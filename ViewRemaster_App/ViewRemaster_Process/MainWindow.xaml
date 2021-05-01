@@ -1,0 +1,77 @@
+﻿<Window x:Class="ViewRemaster_Process.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ViewRemaster_Process"
+        mc:Ignorable="d"
+        Title="ViewRemaster-Processing" Height="600" Width="1900" Background="#FF292929" Loaded="Window_Loaded" Foreground="{x:Null}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="160*"/>
+            <RowDefinition Height="160*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="150*"/>
+            <ColumnDefinition Width="150*"/>
+            <ColumnDefinition Width="150*"/>
+            <ColumnDefinition Width="150*"/>
+            <ColumnDefinition Width="300*"/>
+        </Grid.ColumnDefinitions>
+        <ComboBox x:Name="comboBox_path" Margin="10,10,10,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="150" SelectionChanged="ComboBox_path_SelectionChanged"/>
+        <ComboBox x:Name="comboBox_slide" Grid.Column="1" Margin="10,10,10,0" VerticalAlignment="Top" SelectionChanged="ComboBox_slide_SelectionChanged" HorizontalAlignment="Center" Width="149"/>
+        <Button x:Name="button_next" Content="Next" Grid.Column="2" Margin="0,10,0,0" VerticalAlignment="Top" Click="Button_next_Click" HorizontalAlignment="Center" Width="50"/>
+        <Button x:Name="button_text_update" Content="Update" Grid.Column="3" Margin="0,10,0,0" VerticalAlignment="Top" Click="Button_text_update_Click" HorizontalAlignment="Center" Width="58"/>
+        <Label x:Name="label_status" Content="" Grid.Column="4" Margin="10,10,10,0" VerticalAlignment="Top" HorizontalAlignment="Center" Width="319"  Foreground="#FF9B9B9B"/>
+
+
+        <Label Content="Slide" Grid.Column="0" Grid.Row="1" VerticalAlignment="Bottom" Height="23" Margin="0,0,0,23" HorizontalContentAlignment="Center" Foreground="#FF9B9B9B"/>
+        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" Margin="10,10,10,40" Grid.Row="1" Grid.Column="0" >
+            <Image x:Name="image_slide"/>
+        </Border>
+
+        <Label Content="Mask" Grid.Column="1" Grid.Row="1" VerticalAlignment="Bottom" Height="23" Margin="0,0,0,23" HorizontalContentAlignment="Center" Foreground="#FF9B9B9B"/>
+        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" Margin="10,10,10,40" Grid.Row="1" Grid.Column="1">
+            <Image x:Name="image_mask" MouseLeftButtonDown="Image_mask_MouseLeftButtonDown"/>
+        </Border>
+
+        <Label x:Name="label_mask_threshold" Content="Mask Threshold" Grid.Column="2" Grid.Row="1" VerticalAlignment="Bottom" Height="23" Margin="0,0,0,23" HorizontalContentAlignment="Center" Foreground="#FF9B9B9B"/>
+        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" Margin="10,10,10,40" Grid.Row="1" Grid.Column="2">
+            <Image x:Name="image_threshold"/>
+        </Border>
+
+        <Label x:Name="label_slide_text" Content="Slide Text" Grid.Column="3" Grid.Row="1" VerticalAlignment="Bottom" Height="23" Margin="0,0,0,23" HorizontalContentAlignment="Center" Foreground="#FF9B9B9B"/>
+        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" Margin="10,10,10,40" Grid.Row="1" Grid.Column="3">
+            <Image x:Name="image_text"/>
+        </Border>
+
+        <Label Content="Reel" Grid.Column="0" Grid.Row="2" VerticalAlignment="Bottom" Height="23" Margin="0,0,0,23" HorizontalContentAlignment="Center" Foreground="#FF9B9B9B"/>
+        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" Margin="10,10,10,40" Grid.Row="2" Grid.Column="0">
+            <Image x:Name="image_reel" MouseLeftButtonDown="Image_reel_MouseLeftButtonDown" />
+        </Border>
+
+        <Label Content="Rotated" Grid.Column="1" Grid.Row="2" VerticalAlignment="Bottom" Height="23" Margin="0,0,0,23" HorizontalContentAlignment="Center" Foreground="#FF9B9B9B"/>
+        <TextBox x:Name="textBox_angle" Grid.Column="1" HorizontalAlignment="Left" Height="18"  Grid.Row="2" TextWrapping="Wrap" Text="" VerticalAlignment="Bottom" Width="54" TextChanged="TextBox_angle_TextChanged" Margin="10,0,0,5"/>
+        <Label Content="Increase to rotate left" Grid.Column="1" HorizontalAlignment="Left" Margin="65,237,0,0" Grid.Row="2" VerticalAlignment="Top" Foreground="#FF9B9B9B"/>
+        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" Margin="10,10,10,40" Grid.Row="2" Grid.Column="1">
+            <Image x:Name="image_rotated"/>
+        </Border>
+
+        <Label Content="Cropped" Grid.Column="2" Grid.Row="2" VerticalAlignment="Bottom" Height="30" Margin="0,0,0,16" HorizontalContentAlignment="Center" Foreground="#FF9B9B9B"/>
+        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" Margin="10,10,10,40" Grid.Row="2" Grid.Column="2">
+            <Image x:Name="image_cropped"/>
+        </Border>
+
+        <Label Content="Final" Grid.Column="4" Grid.Row="2" VerticalAlignment="Bottom" Height="23" Margin="10,0,10,32" HorizontalContentAlignment="Left" Foreground="#FF9B9B9B"/>
+        <Border BorderBrush="#FF9B9B9B" BorderThickness="1" Margin="10,10,10,50" Grid.Row="1" Grid.Column="4"  Grid.RowSpan="2">
+            <Image x:Name="image_final"/>
+        </Border>
+
+        <Label Content="Text OCR" Grid.Column="3" Grid.Row="2" VerticalAlignment="Bottom" Height="23" Margin="10,0,10,76" HorizontalContentAlignment="Left" Foreground="#FF9B9B9B"/>
+        <TextBox x:Name="textBox_ocr" Grid.Column="3" Margin="10,10,10,0" Grid.Row="2" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="150" TextChanged="TextBox_ocr_TextChanged" SpellCheck.IsEnabled="True" FontSize="24"/>
+        <Slider x:Name="slider_mask_threshold" Grid.Column="2" Margin="10,0" Grid.Row="1" Width="149" Height="23" VerticalAlignment="Bottom" ValueChanged="Slider_mask_threshold_ValueChanged" Maximum="255" SmallChange="1" Value="100" TickPlacement="BottomRight" TickFrequency="10"/>
+        <Slider x:Name="slider_text_threshold" Grid.Column="3" Margin="10,0" Grid.Row="1" Width="149" Height="23" VerticalAlignment="Bottom" Maximum="255" SmallChange="1" TickFrequency="10" Value="150" ValueChanged="Slider_text_threshold_ValueChanged" TickPlacement="BottomRight"/>
+
+    </Grid>
+</Window>
