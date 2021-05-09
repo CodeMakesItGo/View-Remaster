@@ -30,36 +30,36 @@
         <Rectangle Fill="#FFA2A2A2"  Grid.Row="1" Stroke="Black"  Grid.ColumnSpan="6"/>
         <xctk1:ColorPicker Name="cp" DisplayColorAndName="True" SelectedColorChanged="Cp_SelectedColorChanged" AvailableColorsSortingMode="HueSaturationBrightness"  Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Width="158"  Grid.Row="1" Margin="91,19,89,19" Height="22" Grid.ColumnSpan="2" />
 
-        <Label x:Name="label_brightness" Content="Brightness" HorizontalContentAlignment="Center" HorizontalAlignment="Center"  VerticalAlignment="Bottom" Grid.Row="1" Margin="76,0,104,0" Height="26" Width="158" Grid.Column="2" Grid.ColumnSpan="2"/>
+        <Label x:Name="label_brightness" Content="Brightness" HorizontalContentAlignment="Center" HorizontalAlignment="Center"  VerticalAlignment="Bottom" Grid.Row="1" Margin="81,0,91,0" Height="31" Width="166" Grid.Column="2" Grid.ColumnSpan="2"/>
         <Slider x:Name="slider_brightness" VerticalAlignment="Center" Maximum="255" SmallChange="1" ValueChanged="Slider_brightness_ValueChanged"  Grid.Row="1" Value="100" Margin="81,10,83,26" TickPlacement="TopLeft" TickFrequency="5" Height="24" Grid.Column="2" Grid.ColumnSpan="2"/>
-        <Button x:Name="button_stop" Content="Stop" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Top" Width="76" Click="Button_stop_Click" Grid.Row="1" Margin="0,21,94,0" Height="20"/>
-        <Button x:Name="button_next" Content="Next" Grid.Column="4" VerticalAlignment="Top" Width="74" Click="Button_next_Click" Grid.Row="1" Margin="134,21,132,0" Height="20" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
-        <Button x:Name="button_align" Content="Align" Grid.Column="5" VerticalAlignment="Top" Click="Button_align_Click" Grid.Row="1" Margin="86,21,0,0" Height="20" HorizontalAlignment="Left" Width="74"/>
+        <Button x:Name="button_stop" Content="Stop" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Top" Width="76" Click="Button_stop_Click" Grid.Row="1" Margin="0,21,94,0" Height="29"/>
+        <Button x:Name="button_next" Content="Next" Grid.Column="4" VerticalAlignment="Top" Width="74" Click="Button_next_Click" Grid.Row="1" Margin="134,21,132,0" Height="29" Grid.ColumnSpan="2" HorizontalAlignment="Center"/>
+        <Button x:Name="button_align" Content="Align" Grid.Column="5" VerticalAlignment="Top" Click="Button_align_Click" Grid.Row="1" Margin="86,21,0,0" Height="29" HorizontalAlignment="Left" Width="74"/>
 
         <Rectangle Fill="LightGray"  Grid.Row="0" Stroke="Black"  Grid.ColumnSpan="6"/>
         <ComboBox x:Name="comboBox_comm"  Grid.Row="0" VerticalContentAlignment="Center" HorizontalAlignment="Right" Width="124" Margin="0,7,23,0" VerticalAlignment="Top" />
-        <Button x:Name="button_comm" Content="Connect" Grid.Row="0" VerticalAlignment="Top" Click="Button_Connect_Click" HorizontalAlignment="Left"  Width="74" Margin="34,9,0,0" Height="20" Grid.Column="1" />
+        <Button x:Name="button_comm" Content="Connect" Grid.Row="0" VerticalAlignment="Top" Click="Button_Connect_Click" HorizontalAlignment="Left"  Width="100" Margin="31,9,0,0" Height="26" Grid.Column="1" />
         <Label x:Name="label_comm" Content="" Grid.Column="4" HorizontalAlignment="Left" Grid.Row="0" VerticalAlignment="Center" Height="26" Margin="0,7" Width="10"  />
         <Label x:Name="label_connect" Content="" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="0" VerticalAlignment="Top" Margin="59,7,0,0" Height="26" Width="269" Grid.ColumnSpan="2" />
         <Ellipse x:Name="dot" Grid.Column="2" Fill="Gray" HorizontalAlignment="Left" Height="18" Margin="22,9,0,0" Stroke="Black" VerticalAlignment="Top" Width="18" />
-        <Label x:Name="label_status" Content="Offline" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,6,0,0" Height="26" />
+        <Label x:Name="label_status" Content="Offline" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,6,0,0" Height="29" />
 
         <Rectangle Fill="#FF666666"  Grid.Row="2" Stroke="Black"  Grid.ColumnSpan="6"/>
-        <Button x:Name="button_slidecamera" Content="Slide Camera" Grid.Column="0" HorizontalAlignment="Right" Grid.Row="2" VerticalAlignment="Center" Width="82" Height="24" Click="Button_slidecamera_Click" Margin="0,18,43,18"  />
-        <Button x:Name="button_reelcamera" Content="Reel Camera" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Width="82" Height="24" Click="Button_reelcamera_Click" Margin="43,18,0,18"  />
+        <Button x:Name="button_slidecamera" Content="Slide Camera" Grid.Column="0" HorizontalAlignment="Right" Grid.Row="2" VerticalAlignment="Center" Width="110" Height="24" Click="Button_slidecamera_Click" Margin="0,18,23,18"  />
+        <Button x:Name="button_reelcamera" Content="Reel Camera" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Width="112" Height="24" Click="Button_reelcamera_Click" Margin="31,18,0,18"  />
 
 
         <Image x:Name="videoPlayer" Grid.Row="4"  Margin="40,10,10,10"  Stretch="Fill" Grid.RowSpan="1" Grid.ColumnSpan="3" />
         <Image x:Name="ReelPlayer" Grid.Row="4"  Margin="40,10,10,10"  Stretch="Fill" Grid.ColumnSpan="3" Grid.Column="3"  />
 
 
-        <Button x:Name="button_start" Content="Capture All" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Top" Width="74" Click="Button_start_Click" Margin="22,6,0,0" Height="20"/>
+        <Button x:Name="button_start" Content="Capture All" Grid.Column="2" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Top" Width="100" Click="Button_start_Click" Margin="22,6,0,0" Height="28"/>
         <TextBox x:Name="textBox_ReelName" HorizontalAlignment="Center" Height="24" Grid.Row="3" TextWrapping="Wrap" Text="" VerticalAlignment="Center" Width="264" Margin="36,6,38,30" Grid.ColumnSpan="2"/>
         <Slider x:Name="slider_exposure" Grid.Column="2" Margin="10,10,10,0" Grid.Row="2" VerticalAlignment="Top" ValueChanged="Slider_exposure_ValueChanged" SmallChange="1" TickPlacement="TopLeft" Height="24"/>
         <Label x:Name="label_run_status" Content="" Foreground="#FF9B9B9B" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="3" VerticalAlignment="Top" Height="26" Width="320" Grid.ColumnSpan="2" Grid.Column="4"/>
-        <Label x:Name="label_exposure" Content="Exposure"  Foreground="#FFDADADA" HorizontalContentAlignment="Center" Grid.Column="2" Margin="10,34,10,0" Grid.Row="2" VerticalAlignment="Top" Height="26"/>
+        <Label x:Name="label_exposure" Content="Exposure"  Foreground="#FFDADADA" HorizontalContentAlignment="Center" Grid.Column="2" Margin="10,29,10,0" Grid.Row="2" VerticalAlignment="Top" Height="32" Grid.RowSpan="2"/>
 
-        <Label x:Name="label" Content="Slide View" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Row="4" Foreground="#FF9B9B9B" Grid.RowSpan="1" Margin="10,110,0,0" Width="74" Height="24" VerticalAlignment="Top" >
+        <Label x:Name="label" Content="Slide View" HorizontalContentAlignment="Center" HorizontalAlignment="Left" Grid.Row="4" Foreground="#FF9B9B9B" Grid.RowSpan="1" Margin="1,102,0,0" Width="100" Height="33" VerticalAlignment="Top" >
             <Label.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -68,7 +68,7 @@
                 </TransformGroup>
             </Label.RenderTransform>
         </Label>
-        <Label x:Name="label_Copy" Content="Reel View" Foreground="#FF9B9B9B" HorizontalAlignment="Left" Margin="10,110,0,0" Grid.Row="4" Width="61" Grid.Column="3" Height="30" VerticalAlignment="Top">
+        <Label x:Name="label_Copy" Content="Reel View" HorizontalContentAlignment="Center" Foreground="#FF9B9B9B" HorizontalAlignment="Left" Margin="1,99,0,0" Grid.Row="4" Width="97" Grid.Column="3" Height="30" VerticalAlignment="Top">
             <Label.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -78,7 +78,7 @@
                 </TransformGroup>
             </Label.RenderTransform>
         </Label>
-        <Button x:Name="button_stop_capture" Content="Stop Capture" Grid.Column="3" HorizontalAlignment="Left" Margin="64,10,0,0" Grid.Row="3" VerticalAlignment="Top" Width="75" Click="Button_stop_capture_Click"/>
+        <Button x:Name="button_stop_capture" Content="Stop Capture" Grid.Column="3" HorizontalAlignment="Left" Margin="40,6,0,0" Grid.Row="3" VerticalAlignment="Top" Width="100" Click="Button_stop_capture_Click" Height="28"/>
         <CheckBox x:Name="checkBox_align" Content="Align Reel Visual" Grid.Column="4" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_align_Click"/>
         <CheckBox x:Name="checkBox_spotlight" Content="Spotlight" Grid.Column="5" HorizontalAlignment="Left" Margin="10,22,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_spotlight_Click"/>
         <CheckBox x:Name="checkBox_reel_lock" Content="Lock Reel Camera" Grid.Column="3" HorizontalAlignment="Left" Margin="26,10,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_reel_lock_Click"/>
