@@ -210,6 +210,11 @@ namespace ViewRemaster_Process
             else
             {
                 var bitmap = new BitmapImage();
+                if(File.Exists(path) == false)
+                {
+                    MessageBox.Show($"File name does not exist {path}.");
+                    return;
+                }
                 using (var stream = File.OpenRead(path))
                 {
                     bitmap.BeginInit();
@@ -240,6 +245,16 @@ namespace ViewRemaster_Process
             }
         }
 
-     
+        private void settings_image_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            SettingsWindow sw = new SettingsWindow();
+            sw.ShowDialog();
+
+            if(sw.PathChanged)
+            {
+                processImages.rootPath = Settings.Instance.RootPath;
+                LoadDirectories();
+            }
+        }
     }
 }

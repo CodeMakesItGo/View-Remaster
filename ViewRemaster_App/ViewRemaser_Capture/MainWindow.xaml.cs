@@ -248,7 +248,7 @@ namespace ViewRemaser
             }
         }
 
-        private void checkBox_slide_lock_Click(object sender, RoutedEventArgs e)
+        private void CheckBox_slide_lock_Click(object sender, RoutedEventArgs e)
         {
             if (checkBox_slide_lock.IsChecked.Value)
             {
@@ -260,7 +260,7 @@ namespace ViewRemaser
             }
         }
 
-        private void checkBox_upsidedown_Click(object sender, RoutedEventArgs e)
+        private void CheckBox_upsidedown_Click(object sender, RoutedEventArgs e)
         {
             if(checkBox_upsidedown.IsChecked.Value)
             {

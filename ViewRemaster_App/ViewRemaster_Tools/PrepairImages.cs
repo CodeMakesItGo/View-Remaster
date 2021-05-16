@@ -6,7 +6,7 @@ using System.Drawing.Imaging;
 
 namespace ViewRemaster_Tools
 {
-    public class PrepairImages
+    public class PrepairImages : ViewRemasterBase
     {
         public double FindRotation(Bitmap mask)
         {
@@ -45,18 +45,6 @@ namespace ViewRemaster_Tools
             return rotated;
         }
 
-        public Bitmap ResizeReelImage(Bitmap src)
-        {
-            Bitmap nreel = new Bitmap(1600, 1200, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-            Graphics g = Graphics.FromImage(nreel);
-            g.Clear(System.Drawing.Color.FromArgb(0, System.Drawing.Color.Black));
-
-            var ci = CropImage(src, new Rectangle(160, 0, 1600, 1080));
-            g.DrawImage(ci, 0, 0);
-
-            return nreel;
-        }
-
         public Bitmap MaskImage(Bitmap image, Bitmap mask)
         {
             if (image.Width != mask.Width || image.Height != mask.Height)
@@ -90,6 +78,7 @@ namespace ViewRemaster_Tools
                     {
                         byte* currentLine = maskfp + x + (y * maskData.Stride);
 
+                        //If the mask color is black, then add this pixel to the new image
                         if (currentLine[0] == 0 && currentLine[1] == 0 && currentLine[2] == 0)
                         {
                             byte* newLine = newfp + ((x / maskbpp) * newbpp) + (y * newData.Stride);
@@ -349,8 +338,38 @@ namespace ViewRemaster_Tools
             return newImage;
         }
 
+        public Bitmap CropToCircle(Bitmap image, Point center, int radius, Color backGround)
+        {
+            Bitmap dstImage = new Bitmap(image.Width, image.Height, image.PixelFormat);
+
+            using (Graphics g = Graphics.FromImage(dstImage))
+            {
+                RectangleF r = new RectangleF(center.X - radius, center.Y - radius,
+                                                         radius * 2, radius * 2);
+
+                // enables smoothing of the edge of the circle (less pixelated)
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                // fills background color
+                using (Brush br = new SolidBrush(backGround))
+                {
+                    g.FillRectangle(br, 0, 0, dstImage.Width, dstImage.Height);
+                }
+
+                // adds the new ellipse & draws the image again 
+                GraphicsPath path = new GraphicsPath();
+                path.AddEllipse(r);
+                g.SetClip(path);
+                g.DrawImage(image, 0, 0);
+            }
+            return dstImage;
+        }
+
         internal Bitmap ResizeImage(Bitmap bm, int width, int height)
         {
+            if (bm.Width == width && bm.Height == height)
+                return bm;
+
             // create filter
             ResizeBilinear filter = new ResizeBilinear(width, height);
             // apply the filter
@@ -397,16 +416,69 @@ namespace ViewRemaster_Tools
                 bm.UnlockBits(bitmapData);
             }
 
-            //ConservativeSmoothing cs = new ConservativeSmoothing();
             ContrastCorrection cc = new ContrastCorrection();
-            //ContrastStretch contrastStretch = new ContrastStretch();
-            //Median median = new Median();
-
             cc.ApplyInPlace(bm);
 
             return bm;
         }
 
+        public Bitmap CropToRoundedRectangle(Bitmap image, Rectangle bounds, int cornerRadius, Color backGround)
+        {
+            Bitmap dstImage = new Bitmap(Settings.Instance.SlideCrop_Width, Settings.Instance.SlideCrop_Height, image.PixelFormat);
+
+            
+            using (Graphics g = Graphics.FromImage(dstImage))
+            {
+                // enables smoothing of the edge of the circle (less pixelated)
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+
+                // fills background color
+                using (Brush br = new SolidBrush(backGround))
+                {
+                    g.FillRectangle(br, 0, 0, dstImage.Width, dstImage.Height);
+                }
+
+                using (GraphicsPath path = RoundedRect(bounds, cornerRadius))
+                {               
+                    g.SetClip(path);
+                    g.DrawImage(image, new Rectangle(0, 0, dstImage.Width, dstImage.Height), new Rectangle(Settings.Instance.SlideCrop_X, Settings.Instance.SlideCrop_Y, dstImage.Width, dstImage.Height), GraphicsUnit.Pixel);
+                }
+            }
+
+            return dstImage;
+        }
+
+        public GraphicsPath RoundedRect(Rectangle bounds, int radius)
+        {
+            int diameter = radius * 2;
+            Size size = new Size(diameter, diameter);
+            Rectangle arc = new Rectangle(bounds.Location, size);
+            GraphicsPath path = new GraphicsPath();
+
+            if (radius == 0)
+            {
+                path.AddRectangle(bounds);
+                return path;
+            }
+
+            // top left arc  
+            path.AddArc(arc, 180, 90);
+
+            // top right arc  
+            arc.X = bounds.Right - diameter;
+            path.AddArc(arc, 270, 90);
+
+            // bottom right arc  
+            arc.Y = bounds.Bottom - diameter;
+            path.AddArc(arc, 0, 90);
+
+            // bottom left arc 
+            arc.X = bounds.Left;
+            path.AddArc(arc, 90, 90);
+
+            path.CloseFigure();
+            return path;
+        }
         internal Bitmap FrameImage(Bitmap orig, Bitmap template)
         {
             int xt_start = 800;
@@ -538,25 +610,52 @@ namespace ViewRemaster_Tools
 
         }
 
+        internal Bitmap FrameImage(Bitmap image)
+        {
+            Bitmap dstImage = new Bitmap(image.Width, SlideHeight, image.PixelFormat);
+
+            using (Graphics grD = Graphics.FromImage(dstImage))
+            {
+                grD.FillRectangle(Brushes.Black, 0, 0, image.Width, SlideHeight);
+
+                var rect = new Rectangle()
+                {
+                    X = 0,
+                    Y = Settings.Instance.Slide_Top,
+                    Width = image.Width,
+                    Height = image.Height
+                };
+
+                //Create the framed image
+                grD.DrawImage(image, rect, new Rectangle(0, 0, image.Width, image.Height), GraphicsUnit.Pixel);
+             
+            }
+            return dstImage;
+        }
 
         internal Bitmap AddText(Bitmap image, string text)
         {
-            RectangleF rectf = new RectangleF(420, 1040, 800, 100);
-
-            Graphics g = Graphics.FromImage(image);
-
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-            StringFormat drawFormat = new StringFormat
+            using (Graphics g = Graphics.FromImage(image))
             {
-                Alignment = StringAlignment.Center
-            };
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-            g.DrawString(text, new Font("Arial", 32, FontStyle.Bold), Brushes.White, rectf, drawFormat);
+                StringFormat drawFormat = new StringFormat
+                {
+                    Alignment = StringAlignment.Center
+                };
 
-            g.Flush();
+                var rect = new Rectangle()
+                {
+                    X = 0,
+                    Y = Settings.Instance.SlideText_Top,
+                    Width = image.Width,
+                    Height = image.Height - Settings.Instance.SlideText_Top
+                };
+
+                g.DrawString(text, new Font("Arial", 32, FontStyle.Bold), Brushes.White, rect, drawFormat);
+            }
 
             return image;
         }

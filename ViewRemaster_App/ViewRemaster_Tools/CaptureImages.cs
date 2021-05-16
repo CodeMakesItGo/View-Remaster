@@ -40,7 +40,6 @@ namespace ViewRemaster_Tools
         public CaptureImages()
         {
             Path = "";
-            TemplatePath = rootPath + TemplatePath;
         }
 
         public void CaptureAllImages(string dir)
@@ -181,18 +180,29 @@ namespace ViewRemaster_Tools
             {
                 if (align_reel)
                 {
-                    var maskPath = $"{TemplatePath}\\reel_mask.png";
-                    using (Bitmap template = new Bitmap(maskPath))
+                    using (Graphics gr = Graphics.FromImage(bitmap))
                     {
-                        var pi = new PrepairImages();
-                        var reelImage = pi.MaskImage(bitmap, template);
-                        bi = reelImage.ToBitmapImage();
+                        //Draw the out and inner circle on the reel live image
+                        Rectangle rectOuter = new Rectangle(Settings.Instance.ReelCrop_X, Settings.Instance.ReelCrop_Y, Settings.Instance.ReelCrop_Width, Settings.Instance.ReelCrop_Width);
+                        var x = (Settings.Instance.ReelCrop_X + (Settings.Instance.ReelCrop_Width / 2)) - (Settings.Instance.ReelCropCenter_Width / 2);
+                        var y = (Settings.Instance.ReelCrop_Y + (Settings.Instance.ReelCrop_Width / 2)) - (Settings.Instance.ReelCropCenter_Width / 2);
+                        Rectangle rectInner = new Rectangle(x, y, Settings.Instance.ReelCropCenter_Width, Settings.Instance.ReelCropCenter_Width);
+
+                        using (Pen thick_pen = new Pen(Color.Blue, 8))
+                        {
+                            gr.DrawEllipse(thick_pen, rectOuter);
+                            gr.DrawEllipse(thick_pen, rectInner);
+                        }
+
+                        //Draw the OCR text crop box
+                        Rectangle textBox = new Rectangle(Settings.Instance.TextCrop_X, Settings.Instance.TextCrop_Y, Settings.Instance.TextCrop_Width, Settings.Instance.TextCrop_Height);
+                        using (Pen thick_pen = new Pen(Color.Red, 8))
+                        {
+                            gr.DrawRectangle(thick_pen, textBox);
+                        }
                     }
                 }
-                else
-                {
-                    bi = bitmap.ToBitmapImage();
-                }
+                bi = bitmap.ToBitmapImage();
 
                 if (ReelSnapshotFileName != "")
                 {

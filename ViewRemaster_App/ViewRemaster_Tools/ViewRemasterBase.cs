@@ -12,11 +12,25 @@ namespace ViewRemaster_Tools
         private string _path;
         public string Path { get => _path; set { ProcessPath = value + @"\process"; FinalPath = value + @"\final"; _path = value; } }
 
-        public readonly string rootPath = @"U:\Users\jason\OneDrive\Projects\MakeItGo\ViewRemaster\Slides";
-        public string TemplatePath { get; protected set; } = @"\templates";
+        public string rootPath = "";
         public string ProcessPath { get; protected set; }
         public string FinalPath { get; protected set; }
         public int CurrentSlide { get; set; } = 0;
+
+        //Camera resolution of the shots
+        public readonly int ReelWidth = 1920;
+        public readonly int ReelHeight = 1080;
+        public readonly int SlideWidth = 1600;
+        public readonly int SlideHeight = 1200;
+
+        public readonly int OutputWidth = 1920;
+        public readonly int OutputHeight = 1080;
+
+        public ViewRemasterBase()
+        {
+            Settings.Deserialize();
+            rootPath = Settings.Instance.RootPath;
+        }
 
         public void UpdatePath(string dir)
         {

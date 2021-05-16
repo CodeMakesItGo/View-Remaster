@@ -72,6 +72,7 @@
         <TextBox x:Name="textBox_ocr" Grid.Column="3" Margin="10,10,10,0" Grid.Row="2" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="150" TextChanged="TextBox_ocr_TextChanged" SpellCheck.IsEnabled="True" FontSize="24"/>
         <Slider x:Name="slider_mask_threshold" Grid.Column="2" Margin="10,0" Grid.Row="1" Width="149" Height="23" VerticalAlignment="Bottom" ValueChanged="Slider_mask_threshold_ValueChanged" Maximum="255" SmallChange="1" Value="100" TickPlacement="BottomRight" TickFrequency="10"/>
         <Slider x:Name="slider_text_threshold" Grid.Column="3" Margin="10,0" Grid.Row="1" Width="149" Height="23" VerticalAlignment="Bottom" Maximum="255" SmallChange="1" TickFrequency="10" Value="150" ValueChanged="Slider_text_threshold_ValueChanged" TickPlacement="BottomRight"/>
+        <Image x:Name="settings_image" Grid.Column="4" HorizontalAlignment="Left" Height="40" Margin="576,0,0,0" VerticalAlignment="Top" Width="45" Source="PinClipart.com_cogs-clipart_5699181.png" MouseLeftButtonUp="settings_image_MouseLeftButtonUp"/>
 
     </Grid>
 </Window>

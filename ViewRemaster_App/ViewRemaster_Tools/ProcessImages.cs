@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -20,7 +21,6 @@ namespace ViewRemaster_Tools
         private int Last_Ocr_threshold = 0;
         public int Mask_threshold { get; set; } = 100;
         public double? Rotation_angle { get; set; } = null;
-       
 
         public enum ImageType { SLIDE, REEL, MASK, THREASHOLD, ROTATED, CROPPED, TEXT, FINAL};
         public enum TextType { POPUP, OCR, ANGLE};
@@ -37,11 +37,8 @@ namespace ViewRemaster_Tools
         public ProcessImages()
         {
             Path = "";
-            TemplatePath = rootPath + TemplatePath;
             Last_Ocr_threshold = Ocr_threshold;
         }
-
-       
 
         public void UpdateOcrText(string text)
         {
@@ -81,29 +78,47 @@ namespace ViewRemaster_Tools
                 TextOCR();
                 RotateImage();
                 Finalize2DImage();
-                Finalize3DImage();
+                Finalize3DSlide();
             }
             SetLabelStatusEvent?.Invoke($"Done Process {ProcessOrder[CurrentSlide]} Images");
         }
 
-
+        /// <summary>
+        /// Creates the cropped reel image
+        /// </summary>
         private void ReelImage()
         {
             var imagePath = $"{Path}\\Reel_text.png";
-            var maskPath = $"{TemplatePath}\\reel_mask.png";
             SetImageEvent?.Invoke(ImageType.REEL, imagePath);
 
+            if (!File.Exists(imagePath))
+            {
+                SetTextboxEvent(TextType.POPUP, $"File name does not exist {imagePath}.");
+                return;
+            }
+
+            //Crop to the reel
             using (Bitmap reel = new Bitmap(imagePath))
-            using (Bitmap template = new Bitmap(maskPath))
             {
                 PrepairImages pi = new PrepairImages();
-                var reelImage = pi.MaskImage(reel, template);
-                reelImage.Save($"{ProcessPath}\\0R.png");
-                reelImage.Save($"{ProcessPath}\\0L.png");
+                Point center = new Point { X = Settings.Instance.ReelCrop_X + (Settings.Instance.ReelCrop_Width / 2),
+                                           Y = Settings.Instance.ReelCrop_Y + (Settings.Instance.ReelCrop_Width / 2)};
 
-                var rsReel = pi.ResizeReelImage(reelImage);
-                rsReel.Save($"{ProcessPath}\\0R_final.png");
-                rsReel.Save($"{ProcessPath}\\0L_final.png");
+                var reelImage = pi.CropToCircle(reel, center, Settings.Instance.ReelCrop_Width / 2, Color.Black);
+
+                //Draw the center black circle
+                using (Graphics gr = Graphics.FromImage(reelImage))
+                {
+                    var x = (Settings.Instance.ReelCrop_X + (Settings.Instance.ReelCrop_Width / 2)) - (Settings.Instance.ReelCropCenter_Width / 2);
+                    var y = (Settings.Instance.ReelCrop_Y + (Settings.Instance.ReelCrop_Width / 2)) - (Settings.Instance.ReelCropCenter_Width / 2);
+                    Rectangle rectInner = new Rectangle(x, y, Settings.Instance.ReelCropCenter_Width, Settings.Instance.ReelCropCenter_Width);
+
+                    gr.FillEllipse(Brushes.Black, rectInner);
+                }
+
+                reelImage = pi.ResizeImage(reelImage, OutputWidth, OutputHeight);
+                reelImage.Save($"{ProcessPath}\\0R_final.png");
+                reelImage.Save($"{ProcessPath}\\0L_final.png");
             }
         }
 
@@ -163,12 +178,11 @@ namespace ViewRemaster_Tools
 
             PrepairImages pi = new PrepairImages();
             using (Bitmap textInput = new Bitmap(input))
-            //using (Bitmap textmask = new Bitmap(templatePath + @"\\text_mask.png"))
+            
             using (var grayscaledBitmap = Grayscale.CommonAlgorithms.BT709.Apply(textInput))
             using (var thresholdedBitmap = new Threshold(Ocr_threshold).Apply(grayscaledBitmap))
             {
-                //var textmap = pi.MaskImage(thresholdedBitmap, textmask);
-                var image_crop = pi.CropImage(thresholdedBitmap, new Rectangle(820, 170, 270, 160));
+                var image_crop = pi.CropImage(thresholdedBitmap, new Rectangle(Settings.Instance.TextCrop_X, Settings.Instance.TextCrop_Y, Settings.Instance.TextCrop_Width, Settings.Instance.TextCrop_Height));
 
                 image_crop.Save(filename);
                 SetImageEvent?.Invoke(ImageType.TEXT, filename);
@@ -220,25 +234,51 @@ namespace ViewRemaster_Tools
             }
         }
 
+        /// <summary>
+        /// Creates the first side-by-side image that is a picture of the reel
+        /// </summary>
         private void Finalize3DReel()
         {
-            //crop
-            //550 1400
-            int ReelWidth = 875;
+            var filename = $"{ProcessPath}\\0R_final.png";
 
-            var filename = $"{ProcessPath}\\0R.png";
+            if (!File.Exists(filename))
+            {
+                SetTextboxEvent(TextType.POPUP, $"File name does not exist {filename}.");
+                return;
+            }
 
             using (Bitmap i = new Bitmap(filename))
             {
                 PrepairImages pi = new PrepairImages();
-                var left = pi.CropImage(i, new Rectangle(525, 0, ReelWidth, 1080));
 
-                using (Bitmap bitmap = new Bitmap(1920, 1080, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                //Crop to just the reel width
+                var left = pi.CropImage(i, new Rectangle(Settings.Instance.ReelCrop_X, 0, Settings.Instance.ReelCrop_Width, ReelHeight));
+
+                float totalWidth = Settings.Instance.ReelCrop_Width + (Settings.Instance.Slide_Gap);
+                float totalHeight = ReelHeight;
+
+                var halfWidth = (OutputWidth / 2);
+                var halfGap = (Settings.Instance.Slide_Gap / 2);
+          
+                float ratio = totalWidth / totalHeight;
+                int resizeRatio = (int)(halfWidth / ratio);
+                int offsetHeight = ((OutputHeight - resizeRatio) / 2);
+
+                //left = pi.ResizeImage(left, halfWidth, (int)resizeRatio);
+
+                using (Bitmap bitmap = new Bitmap(OutputWidth, OutputHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                 using (Graphics grD = Graphics.FromImage(bitmap))
                 {
-                    grD.FillRectangle(Brushes.Black, 0, 0, 1920, 1080);
-                    grD.DrawImage(left, new Rectangle(75, 0, ReelWidth, 1080), new Rectangle(0, 0, ReelWidth, 1080), GraphicsUnit.Pixel);
-                    grD.DrawImage(left, new Rectangle(970, 0, ReelWidth, 1080), new Rectangle(0, 0, ReelWidth, 1080), GraphicsUnit.Pixel);
+                    grD.SmoothingMode = SmoothingMode.AntiAlias;
+
+                    //Black background
+                    grD.FillRectangle(Brushes.Black, 0, 0, OutputWidth, OutputHeight);
+
+                    //Left image resized
+                    grD.DrawImage(left, new Rectangle(halfGap, offsetHeight, halfWidth - Settings.Instance.Slide_Gap, resizeRatio), new Rectangle(0, 0, Settings.Instance.ReelCrop_Width, ReelHeight), GraphicsUnit.Pixel);
+
+                    //Right image resized, same image as left
+                    grD.DrawImage(left, new Rectangle(halfWidth + halfGap, offsetHeight, halfWidth - Settings.Instance.Slide_Gap, resizeRatio), new Rectangle(0, 0, Settings.Instance.ReelCrop_Width, ReelHeight), GraphicsUnit.Pixel);
 
                     filename = $"{FinalPath}\\0_final.png";
                     bitmap.Save(filename);
@@ -247,11 +287,11 @@ namespace ViewRemaster_Tools
             }
         }
 
-        private void Finalize3DImage()
+        /// <summary>
+        /// Creates each Side-by-side slide
+        /// </summary>
+        private void Finalize3DSlide()
         {
-            //crop
-            //x260 - 1345 = 1085 width of slide
-            //Make 3D image
             if (ProcessOrder[CurrentSlide].Contains("L"))
             {
                 return;
@@ -260,34 +300,59 @@ namespace ViewRemaster_Tools
             var filenamer = $"{ProcessPath}\\{ProcessOrder[CurrentSlide]}_final.png";
             var leftFile = ProcessOrder[CurrentSlide].Replace('R', 'L');
             var filenamel = $"{ProcessPath}\\{leftFile}_final.png";
-            int offset = 20;
+
+            if (!File.Exists(filenamer))
+            {
+                SetTextboxEvent(TextType.POPUP, $"File name does not exist {filenamer}.");
+                return;
+            }
+
+            if (!File.Exists(filenamel))
+            {
+                SetTextboxEvent(TextType.POPUP, $"File name does not exist {filenamel}.");
+                return;
+            }
 
             using (Bitmap ir = new Bitmap(filenamer))
             using (Bitmap il = new Bitmap(filenamel))
             {
                 PrepairImages pi = new PrepairImages();
+                
+                float totalWidth = Settings.Instance.SlideCrop_Width + (Settings.Instance.Slide_Gap);
+                float totalHeight = SlideHeight;
 
-                float totalWidth = 1085 + (offset * 2);
-                float totalHeight = 1200;
-
-                var left = pi.CropImage(il, new Rectangle(260 - offset, 0, (int)totalWidth, 1200));
-                var right = pi.CropImage(ir, new Rectangle(260 - offset, 0, (int)totalWidth, 1200));
-
+                var halfWidth = (OutputWidth / 2);
+                var halfGap = (Settings.Instance.Slide_Gap / 2);
+      
                 float ratio = totalWidth / totalHeight;
-                float resizeRatio = 960.0f / ratio;
-                int offsetHeight = (int)((1080 - (int)resizeRatio) / 2.0f);
+                int resizeHeight = (int)((halfWidth) / ratio);
+                int offsetHeight = ((OutputHeight - resizeHeight) / 2);
 
-                left = pi.ResizeImage(left, 960, (int)resizeRatio);
-                right = pi.ResizeImage(right, 960, (int)resizeRatio);
-
-                using (Bitmap bitmap = new Bitmap(1920, 1080, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                //Parallel VR viewing
+                using (Bitmap bitmap = new Bitmap(OutputWidth, OutputHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                 using (Graphics grD = Graphics.FromImage(bitmap))
                 {
-                    grD.FillRectangle(Brushes.Black, 0, 0, 1920, 1080);
-                    grD.DrawImage(left, new Rectangle(0, offsetHeight, 960, (int)resizeRatio), new Rectangle(0, 0, 960, (int)resizeRatio), GraphicsUnit.Pixel);
-                    grD.DrawImage(right, new Rectangle(960, offsetHeight, 960, (int)resizeRatio), new Rectangle(0, 0, 960, (int)resizeRatio), GraphicsUnit.Pixel);
+                    grD.FillRectangle(Brushes.Black, 0, 0, OutputWidth, OutputHeight);
+
+                    grD.DrawImage(il, new Rectangle(halfGap, offsetHeight, halfWidth - Settings.Instance.Slide_Gap, resizeHeight), new Rectangle(0, 0, Settings.Instance.SlideCrop_Width, SlideHeight), GraphicsUnit.Pixel);
+                    grD.DrawImage(ir, new Rectangle(halfWidth + halfGap, offsetHeight, halfWidth - Settings.Instance.Slide_Gap, resizeHeight), new Rectangle(0, 0, Settings.Instance.SlideCrop_Width, SlideHeight), GraphicsUnit.Pixel);
 
                     var filename = $"{FinalPath}\\{ProcessOrder[CurrentSlide].Substring(0, 1)}_final.png";
+                    bitmap.Save(filename);
+                }
+
+                //Cross viewing
+                using (Bitmap bitmap = new Bitmap(OutputWidth, OutputHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                using (Graphics grD = Graphics.FromImage(bitmap))
+                {
+                    grD.FillRectangle(Brushes.Black, 0, 0, OutputWidth, OutputHeight);
+
+                    //Swap left and right images for cross viewing
+                    grD.DrawImage(ir, new Rectangle(halfGap, offsetHeight, halfWidth - Settings.Instance.Slide_Gap, resizeHeight), new Rectangle(0, 0, Settings.Instance.SlideCrop_Width, SlideHeight), GraphicsUnit.Pixel);
+                    grD.DrawImage(il, new Rectangle(halfWidth + halfGap, offsetHeight, halfWidth - Settings.Instance.Slide_Gap, resizeHeight), new Rectangle(0, 0, Settings.Instance.SlideCrop_Width, SlideHeight), GraphicsUnit.Pixel);
+
+                    var filename = $"{FinalPath}\\{ProcessOrder[CurrentSlide].Substring(0, 1)}_final_xview.png";
+
                     bitmap.Save(filename);
                 }
             }
@@ -301,15 +366,28 @@ namespace ViewRemaster_Tools
             using (Bitmap image_rot = new Bitmap(filename_image))
             {
                 PrepairImages pi = new PrepairImages();
+
                 var image_crop = pi.CropImage(image_rot, true);
-                var image_colored = pi.RecolorImage(image_crop);
-
                 var filename_cropped = $"{ProcessPath}\\{ProcessOrder[CurrentSlide]}_cropped.png";
-                image_colored.Save(filename_cropped);
-                SetImageEvent?.Invoke(ImageType.CROPPED, filename_cropped);
+                image_crop.Save(filename_cropped);
 
-                var template = new Bitmap($"{TemplatePath}\\slide_1600_1200.png");
-                var image_framed = pi.FrameImage(image_colored, template);
+                var rect = new Rectangle()
+                {
+                    X = 0,
+                    Y = 0,
+                    Width = Settings.Instance.SlideCrop_Width,
+                    Height = Settings.Instance.SlideCrop_Height
+                };
+
+                var image_trimmed = pi.CropToRoundedRectangle(image_crop, rect, Settings.Instance.SlideCrop_Corner, Color.Black);
+                var filename_trimmed = $"{ProcessPath}\\{ProcessOrder[CurrentSlide]}_cropped_trimmed.png";
+                image_trimmed.Save(filename_trimmed);
+
+                SetImageEvent?.Invoke(ImageType.CROPPED, filename_trimmed);
+
+                var filename_frammed = $"{ProcessPath}\\{ProcessOrder[CurrentSlide]}_cropped_frammed.png";
+                var image_framed = pi.FrameImage(image_trimmed);
+                image_framed.Save(filename_frammed);
 
                 var textFile = ProcessOrder[CurrentSlide].Replace('R', 'L');
                 var filename = $"{ProcessPath}\\{textFile}_text_masked.txt";

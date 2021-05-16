@@ -82,8 +82,8 @@
         <CheckBox x:Name="checkBox_align" Content="Align Reel Visual" Grid.Column="4" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_align_Click"/>
         <CheckBox x:Name="checkBox_spotlight" Content="Spotlight" Grid.Column="5" HorizontalAlignment="Left" Margin="10,22,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_spotlight_Click"/>
         <CheckBox x:Name="checkBox_reel_lock" Content="Lock Reel Camera" Grid.Column="3" HorizontalAlignment="Left" Margin="26,10,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_reel_lock_Click"/>
-        <CheckBox x:Name="checkBox_slide_lock" Content="Lock Slide Camera" Grid.Column="3" HorizontalAlignment="Left" Margin="26,34,0,0" Grid.Row="2" VerticalAlignment="Top" Click="checkBox_slide_lock_Click"/>
-        <CheckBox x:Name="checkBox_upsidedown" Content="Reel Upside down" Grid.Column="4" HorizontalAlignment="Left" Margin="10,35,0,0" Grid.Row="2" VerticalAlignment="Top" Click="checkBox_upsidedown_Click"/>
+        <CheckBox x:Name="checkBox_slide_lock" Content="Lock Slide Camera" Grid.Column="3" HorizontalAlignment="Left" Margin="26,34,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_slide_lock_Click"/>
+        <CheckBox x:Name="checkBox_upsidedown" Content="Reel Upside down" Grid.Column="4" HorizontalAlignment="Left" Margin="10,35,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_upsidedown_Click"/>
 
 
     </Grid>
