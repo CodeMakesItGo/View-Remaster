@@ -11,11 +11,12 @@ namespace ViewRemaster_Tools
         public double FindRotation(Bitmap mask)
         {
             double angle = 0;
+            int depth = 300;
             using (var temp = CropImage(mask, true, true))
             {
                 //find first black group of pixels
                 int y1 = 0;
-                int x1 = 200;
+                int x1 = depth;
 
                 while (temp.GetPixel(x1, y1).GetBrightness() > 0)
                 {
@@ -23,7 +24,7 @@ namespace ViewRemaster_Tools
                 }
 
                 int y2 = 0;
-                int x2 = temp.Width - 200; ;
+                int x2 = temp.Width - depth; ;
                 while (temp.GetPixel(x2, y2).GetBrightness() > 0)
                 {
                     y2++;
@@ -422,11 +423,10 @@ namespace ViewRemaster_Tools
             return bm;
         }
 
-        public Bitmap CropToRoundedRectangle(Bitmap image, Rectangle bounds, int cornerRadius, Color backGround)
+        public Bitmap CropToRoundedRectangle(Bitmap image, Rectangle bounds, int cornerRadius, Color backGround, bool outlineOnly = false)
         {
             Bitmap dstImage = new Bitmap(Settings.Instance.SlideCrop_Width, Settings.Instance.SlideCrop_Height, image.PixelFormat);
 
-            
             using (Graphics g = Graphics.FromImage(dstImage))
             {
                 // enables smoothing of the edge of the circle (less pixelated)
@@ -438,10 +438,26 @@ namespace ViewRemaster_Tools
                     g.FillRectangle(br, 0, 0, dstImage.Width, dstImage.Height);
                 }
 
+                var rect = new Rectangle()
+                {
+                    X = Settings.Instance.SlideCrop_X,
+                    Y = Settings.Instance.SlideCrop_Y,
+                    Width = Settings.Instance.SlideCrop_Width,
+                    Height = Settings.Instance.SlideCrop_Height
+                };
+
                 using (GraphicsPath path = RoundedRect(bounds, cornerRadius))
                 {               
-                    g.SetClip(path);
-                    g.DrawImage(image, new Rectangle(0, 0, dstImage.Width, dstImage.Height), new Rectangle(Settings.Instance.SlideCrop_X, Settings.Instance.SlideCrop_Y, dstImage.Width, dstImage.Height), GraphicsUnit.Pixel);
+                    if (outlineOnly)
+                    {
+                        g.DrawImage(image, new Rectangle(0, 0, dstImage.Width, dstImage.Height), rect, GraphicsUnit.Pixel);
+                        g.DrawPath(new Pen(Brushes.Blue, 10), path);
+                    }
+                    else
+                    {
+                        g.SetClip(path);
+                        g.DrawImage(image, new Rectangle(0, 0, dstImage.Width, dstImage.Height), rect, GraphicsUnit.Pixel);
+                    }
                 }
             }
 

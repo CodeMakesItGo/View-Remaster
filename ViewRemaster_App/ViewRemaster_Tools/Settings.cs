@@ -13,7 +13,7 @@ namespace ViewRemaster_Tools
     [XmlRoot()]
     public class Settings
     {
-        private static Settings instance = new Settings();
+        private static Settings instance = null;
         private static readonly string AppTmpFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\View_Remaster";
         private static readonly string SettingsFilePath = AppTmpFolder + "\\settings.xml";
 
@@ -27,6 +27,11 @@ namespace ViewRemaster_Tools
         {
             get
             {
+                if (instance == null)
+                {
+                    instance = new Settings();
+                    Settings.Deserialize();
+                }
                 return instance;
             }
         }

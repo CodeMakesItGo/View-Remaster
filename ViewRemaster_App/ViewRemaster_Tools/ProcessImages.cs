@@ -34,6 +34,9 @@ namespace ViewRemaster_Tools
         public delegate void SetTextboxDelegate(TextType textBox, string text);
         public event SetTextboxDelegate SetTextboxEvent;
 
+        private Thread process_thread;
+        private int PreviousSlide = 0;
+
         public ProcessImages()
         {
             Path = "";
@@ -54,14 +57,20 @@ namespace ViewRemaster_Tools
             }
         }
 
+
         public void ProcessImage()
         {
             if (Path != "")
             {
-                Rotation_angle = null;
-
-                Thread thread = new Thread(new ThreadStart(ProcessImagesThread));
-                thread.Start();
+                if(process_thread != null &&
+                   process_thread.ThreadState == ThreadState.Running)
+                {
+                    return;
+                }
+                process_thread = new Thread(new ThreadStart(ProcessImagesThread));
+                process_thread.Name = "Process Thread";
+                
+                process_thread.Start();
             }
         }
 
@@ -217,8 +226,12 @@ namespace ViewRemaster_Tools
                 PrepairImages pi = new PrepairImages();
 
                 double angle = 0.0;
-                if (Rotation_angle.HasValue == false)
+                if (PreviousSlide != CurrentSlide)
+                {
                     angle = pi.FindRotation(mask);
+                    Rotation_angle = angle;
+                    PreviousSlide = CurrentSlide;
+                }
                 else
                     angle = Rotation_angle.Value;
 
@@ -341,20 +354,6 @@ namespace ViewRemaster_Tools
                     bitmap.Save(filename);
                 }
 
-                //Cross viewing
-                using (Bitmap bitmap = new Bitmap(OutputWidth, OutputHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
-                using (Graphics grD = Graphics.FromImage(bitmap))
-                {
-                    grD.FillRectangle(Brushes.Black, 0, 0, OutputWidth, OutputHeight);
-
-                    //Swap left and right images for cross viewing
-                    grD.DrawImage(ir, new Rectangle(halfGap, offsetHeight, halfWidth - Settings.Instance.Slide_Gap, resizeHeight), new Rectangle(0, 0, Settings.Instance.SlideCrop_Width, SlideHeight), GraphicsUnit.Pixel);
-                    grD.DrawImage(il, new Rectangle(halfWidth + halfGap, offsetHeight, halfWidth - Settings.Instance.Slide_Gap, resizeHeight), new Rectangle(0, 0, Settings.Instance.SlideCrop_Width, SlideHeight), GraphicsUnit.Pixel);
-
-                    var filename = $"{FinalPath}\\{ProcessOrder[CurrentSlide].Substring(0, 1)}_final_xview.png";
-
-                    bitmap.Save(filename);
-                }
             }
         }
 
@@ -379,11 +378,15 @@ namespace ViewRemaster_Tools
                     Height = Settings.Instance.SlideCrop_Height
                 };
 
-                var image_trimmed = pi.CropToRoundedRectangle(image_crop, rect, Settings.Instance.SlideCrop_Corner, Color.Black);
+
+                //Draw Rounded Rect crop line
+                var image_trimmed = pi.CropToRoundedRectangle(image_crop, rect, Settings.Instance.SlideCrop_Corner, Color.Black, true);
                 var filename_trimmed = $"{ProcessPath}\\{ProcessOrder[CurrentSlide]}_cropped_trimmed.png";
                 image_trimmed.Save(filename_trimmed);
-
                 SetImageEvent?.Invoke(ImageType.CROPPED, filename_trimmed);
+
+                //Crop rounded Rect
+                image_trimmed = pi.CropToRoundedRectangle(image_crop, rect, Settings.Instance.SlideCrop_Corner, Color.Black);
 
                 var filename_frammed = $"{ProcessPath}\\{ProcessOrder[CurrentSlide]}_cropped_frammed.png";
                 var image_framed = pi.FrameImage(image_trimmed);

@@ -28,7 +28,6 @@ namespace ViewRemaster_Tools
 
         public ViewRemasterBase()
         {
-            Settings.Deserialize();
             rootPath = Settings.Instance.RootPath;
         }
 

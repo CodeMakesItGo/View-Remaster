@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -56,8 +57,9 @@ namespace ViewRemaster_Process
         {
             if(forceUpdate)
             {
-                //processImages.ProcessImage();
+                processImages.ProcessImage();
                 forceUpdate = false;
+                return;
             }
 
             if (comboBox_slide.SelectedIndex < comboBox_slide.Items.Count - 1)
@@ -74,7 +76,7 @@ namespace ViewRemaster_Process
                     }
                     catch
                     {
-
+                        MessageBox.Show("Failed to rename directory");
                     }
                     processImages.Path = "";
                     LoadDirectories();
@@ -89,7 +91,10 @@ namespace ViewRemaster_Process
                 image_text.Source = null;
                 image_threshold.Source = null;
                 textBox_ocr.Text = "";
-                textBox_angle.Text = "";
+                spinner_rotation.Text = "0.0";
+
+                //Reset the rotation value
+                processImages.Rotation_angle = null;
             }
         }
 
@@ -132,15 +137,6 @@ namespace ViewRemaster_Process
             forceUpdate = true;
         }
 
-        private void TextBox_angle_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if(double.TryParse(textBox_angle.Text, out var angle))
-            {
-                processImages.Rotation_angle = angle;
-                forceUpdate = true;
-            }
-        }
-
         private void Image_reel_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             OpenInPaint((string)image_reel.Tag);
@@ -173,19 +169,14 @@ namespace ViewRemaster_Process
             }
             else
             {
-                TextBox textBox = null;
-
                 switch (textType)
                 {
-                    case ProcessImages.TextType.ANGLE: textBox = textBox_angle; break;
-                    case ProcessImages.TextType.OCR: textBox = textBox_ocr; break;
+                    case ProcessImages.TextType.ANGLE: spinner_rotation.Text = text; break;
+                    case ProcessImages.TextType.OCR: textBox_ocr.Text = text; break;
                     case ProcessImages.TextType.POPUP: MessageBox.Show(text); break;
 
                     default: return;
                 }
-
-                if (textBox != null)
-                    textBox.Text = text;
             }
         }
 
@@ -255,6 +246,24 @@ namespace ViewRemaster_Process
                 processImages.rootPath = Settings.Instance.RootPath;
                 LoadDirectories();
             }
+        }
+
+        private void textBox_ocr_LostFocus(object sender, RoutedEventArgs e)
+        {
+            forceUpdate = true;
+        }
+
+        private void spinner_rotation_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        {
+            if (double.TryParse(spinner_rotation.Text, out var angle))
+            {
+                processImages.Rotation_angle = angle;
+            }
+        }
+
+        private void spinner_rotation_Spinned(object sender, Xceed.Wpf.Toolkit.SpinEventArgs e)
+        {
+            forceUpdate = true;
         }
     }
 }
