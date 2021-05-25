@@ -39,17 +39,10 @@ CRGB leds[NUM_LEDS];
 void stepperOutput()
 {
   static int output = 0;
-  static long last_update = millis();
-
-  if(millis() - last_update < STEPPER_DELAY)
-  {
-    return; //Not enough time has passed for stepper motor
-  }
-
-  last_update = millis();
-
+ 
   if(motor_state == OFF)
   {
+    return;
     digitalWrite(PD2, LOW);
     digitalWrite(PD3, LOW);
     digitalWrite(PD4, LOW);
@@ -57,21 +50,15 @@ void stepperOutput()
   }
   else
   {
-    //Limit to range 0 - 7
-    output = output % 8;
-  
-    //enable output based on counter and step type
-    digitalWrite(PD2, output == 7 || output == 0 || output == 1 ? HIGH : LOW);
-    digitalWrite(PD3, output == 1 || output == 2 || output == 3 ? HIGH : LOW);
-    digitalWrite(PD4, output == 3 || output == 4 || output == 5 ? HIGH : LOW);
-    digitalWrite(PD5, output == 5 || output == 6 || output == 7 ? HIGH : LOW);
-
     stepCounter++;
     
     //Using Full Steps
     if(motor_state == FWD)
     {
       output += STEP_MODE;
+      
+      //Limit to range 0 - 7
+      output = output % 8;
     }
     else
     {
@@ -81,6 +68,12 @@ void stepperOutput()
         output = 7;
       }
     }
+
+     //enable output based on counter and step type
+    digitalWrite(PD2, output == 7 || output == 0 || output == 1 ? HIGH : LOW);
+    digitalWrite(PD3, output == 1 || output == 2 || output == 3 ? HIGH : LOW);
+    digitalWrite(PD4, output == 3 || output == 4 || output == 5 ? HIGH : LOW);
+    digitalWrite(PD5, output == 5 || output == 6 || output == 7 ? HIGH : LOW);
   }
 }
 
@@ -98,6 +91,22 @@ void serialInput()
     {
       Serial.println("ALIGN");
       function = ALIGN;
+    }
+    else if (inputString.equalsIgnoreCase("U\n")) 
+    {
+      Serial.println("UP");
+      motor_state = FWD;
+      stepperOutput();
+      function = NONE;
+      Serial.println("DONE");
+    }
+    else if (inputString.equalsIgnoreCase("D\n")) 
+    {
+      Serial.println("DOWN");
+      motor_state = REV;
+      stepperOutput();
+      function = NONE;
+      Serial.println("DONE");
     }
     else if (inputString.equalsIgnoreCase("S\n")) 
     {
@@ -141,7 +150,6 @@ void serialInput()
       int e = inputString.indexOf(',');
       bool success = false;
 
-           
       do
       {
         if(e == -1) break;
@@ -246,6 +254,8 @@ void nextSlide(bool align)
 
 void loop() 
 {
+  static long last_update = millis();
+   
   switch(function)
   {
     case NEXT:
@@ -260,8 +270,13 @@ void loop()
       motor_state = OFF;
       state = START;
   }
-  
-  stepperOutput();
+
+  if(millis() - last_update >= STEPPER_DELAY)
+  {
+    last_update = millis();
+    stepperOutput();
+  }
+
   serialInput();
 }
 
