@@ -79,7 +79,6 @@ namespace ViewRemaser
             try
             {
                 BitmapImage bi = captureImages.UpdateSlideImage((Bitmap)eventArgs.Frame.Clone());
-
                 Dispatcher.Invoke(new Action(() => videoPlayer.Source = bi));
                 SlideCamera.SetExposure(Exposure);
             }
@@ -95,7 +94,6 @@ namespace ViewRemaser
             try
             {
                 BitmapImage bi = captureImages.UpdateReelImage(eventArgs.Frame, align_reel);
-
                 Dispatcher.BeginInvoke(new Action(() => ReelPlayer.Source = bi));
             }
             catch (Exception exc)
@@ -269,6 +267,26 @@ namespace ViewRemaser
             else
             {
                 captureImages.UpsideDown = false;
+            }
+        }
+
+        private void slider_threshold_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if(label_threshold != null)
+                label_threshold.Content = $"Threshold {(int)slider_threshold.Value}";
+
+            captureImages.Threshold = (int)slider_threshold.Value;
+        }
+
+        private void checkBox_threshold_Click(object sender, RoutedEventArgs e)
+        {
+            if (checkBox_threshold.IsChecked.HasValue)
+            {
+                captureImages.ThresholdEnabled = checkBox_threshold.IsChecked.Value;
+            }
+            else
+            {
+                captureImages.ThresholdEnabled = false;
             }
         }
     }

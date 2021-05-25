@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AForge.Imaging.Filters;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO.Ports;
@@ -19,9 +20,15 @@ namespace ViewRemaster_Tools
 
         private SerialPort serialPort = null;
 
+        private bool AlignSlideTopGood = false;
+        private bool AlignSlideBottomGood = false;
+
+        private bool AlignSlideEnabled = false;
         private bool _CommWaiting = false;
         private bool CommWaiting { get { return _CommWaiting; } set { CommWaitingEvent?.Invoke(value); _CommWaiting = value; } }
         public bool UpsideDown { get; set; } = false;
+        public int Threshold { get; set; }
+        public bool ThresholdEnabled { get; set; } = false;
 
         private bool StopThread = false;
         public bool CommOpen { get; private set; } = false;
@@ -90,6 +97,7 @@ namespace ViewRemaster_Tools
                 CurrentSlide++;
 
                 Lights(true, false);
+                AlignSlide();
                 TakeThresholdImage();
                 ReelShot();
 
@@ -100,6 +108,32 @@ namespace ViewRemaster_Tools
             }
 
             Lights(false, false);
+        }
+
+        public void AlignSlide()
+        {
+            AlignSlideEnabled = true;
+            AlignSlideBottomGood = false;
+            AlignSlideTopGood = false;
+
+            while (AlignSlideBottomGood == false || AlignSlideTopGood == false)
+            {
+               
+                if (AlignSlideTopGood == false)
+                {
+                    InchDown();
+                    WaitForSerial();
+                }
+
+
+                if (AlignSlideBottomGood == false)
+                {
+                    InchUp();
+                    WaitForSerial();
+                }
+            }
+
+            AlignSlideEnabled = false;
         }
 
         private void Lights(bool spotlight, bool backlight)
@@ -154,12 +188,55 @@ namespace ViewRemaster_Tools
 
             using (var bm = (Bitmap)frame.Clone())
             {
-                if (CaptureOrder[CurrentSlide].Contains("R"))
+                bool upsideDown = CaptureOrder[CurrentSlide].Contains("R");
+                if (upsideDown)
                 {
                     bm.RotateFlip(RotateFlipType.Rotate180FlipNone);
                 }
 
-                bi = bm.ToBitmapImage();
+                if (ThresholdEnabled || AlignSlideEnabled)
+                {
+                    using (var grayscaledBitmap = Grayscale.CommonAlgorithms.BT709.Apply(bm))
+                    using (var thresholdedBitmap = new Threshold(Threshold).Apply(grayscaledBitmap))
+                    {
+                        bi = thresholdedBitmap.ToBitmapImage();
+
+                        if (AlignSlideEnabled)
+                        {
+                            int center = thresholdedBitmap.Width / 2;
+                            int width = 30;
+                            int gap = 50;
+
+                            //test 3 dots top
+                            if (thresholdedBitmap.GetPixel(center, gap).Name.Equals("ffffffff") &&
+                                thresholdedBitmap.GetPixel(center + width, gap).Name.Equals("ffffffff") &&
+                                thresholdedBitmap.GetPixel(center - width, gap).Name.Equals("ffffffff"))
+                            {
+                                if (upsideDown) AlignSlideBottomGood = true; else AlignSlideTopGood = true;
+                            }
+                            else
+                            {
+                                if (upsideDown) AlignSlideBottomGood = false; else AlignSlideTopGood = false;
+                            }
+
+                            //test 3 dots bottom
+                            if (thresholdedBitmap.GetPixel(center, thresholdedBitmap.Height - gap).Name.Equals("ffffffff") &&
+                               thresholdedBitmap.GetPixel(center + width, thresholdedBitmap.Height - gap).Name.Equals("ffffffff") &&
+                               thresholdedBitmap.GetPixel(center - width, thresholdedBitmap.Height - gap).Name.Equals("ffffffff"))
+                            {
+                                if (upsideDown) AlignSlideTopGood = true; else AlignSlideBottomGood = true;
+                            }
+                            else
+                            {
+                                if (upsideDown) AlignSlideTopGood = false; else AlignSlideBottomGood = false;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    bi = bm.ToBitmapImage();
+                }
 
                 if (SlideSnapshotFileName != "")
                 {
@@ -326,5 +403,16 @@ namespace ViewRemaster_Tools
         {
             WriteSerial($"S");
         }
+
+        public void InchUp()
+        {
+            WriteSerial($"U");
+        }
+ 
+        public void InchDown()
+        {
+            WriteSerial($"D");
+        }
+
     }
 }

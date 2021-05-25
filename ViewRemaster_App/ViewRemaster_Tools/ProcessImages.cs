@@ -67,9 +67,11 @@ namespace ViewRemaster_Tools
                 {
                     return;
                 }
-                process_thread = new Thread(new ThreadStart(ProcessImagesThread));
-                process_thread.Name = "Process Thread";
-                
+                process_thread = new Thread(new ThreadStart(ProcessImagesThread))
+                {
+                    Name = "Process Thread"
+                };
+
                 process_thread.Start();
             }
         }

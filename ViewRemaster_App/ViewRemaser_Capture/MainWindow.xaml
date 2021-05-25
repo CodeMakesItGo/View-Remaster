@@ -45,8 +45,8 @@
         <Label x:Name="label_status" Content="Offline" Grid.Column="4" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,6,0,0" Height="29" />
 
         <Rectangle Fill="#FF666666"  Grid.Row="2" Stroke="Black"  Grid.ColumnSpan="6"/>
-        <Button x:Name="button_slidecamera" Content="Slide Camera" Grid.Column="0" HorizontalAlignment="Right" Grid.Row="2" VerticalAlignment="Center" Width="110" Height="24" Click="Button_slidecamera_Click" Margin="0,18,23,18"  />
-        <Button x:Name="button_reelcamera" Content="Reel Camera" HorizontalAlignment="Left" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center" Width="112" Height="24" Click="Button_reelcamera_Click" Margin="31,18,0,18"  />
+        <Button x:Name="button_slidecamera" Content="Slide Camera" Grid.Column="0" HorizontalAlignment="Left" Grid.Row="2" VerticalAlignment="Center" Width="110" Height="24" Click="Button_slidecamera_Click" Margin="36,5,0,31"  />
+        <Button x:Name="button_reelcamera" Content="Reel Camera" HorizontalAlignment="Left" Grid.Row="2" VerticalAlignment="Center" Width="110" Height="24" Click="Button_reelcamera_Click" Margin="36,31,0,5"  />
 
 
         <Image x:Name="videoPlayer" Grid.Row="4"  Margin="40,10,10,10"  Stretch="Fill" Grid.RowSpan="1" Grid.ColumnSpan="3" />
@@ -80,10 +80,13 @@
         </Label>
         <Button x:Name="button_stop_capture" Content="Stop Capture" Grid.Column="3" HorizontalAlignment="Left" Margin="40,6,0,0" Grid.Row="3" VerticalAlignment="Top" Width="100" Click="Button_stop_capture_Click" Height="28"/>
         <CheckBox x:Name="checkBox_align" Content="Align Reel Visual" Grid.Column="4" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_align_Click"/>
-        <CheckBox x:Name="checkBox_spotlight" Content="Spotlight" Grid.Column="5" HorizontalAlignment="Left" Margin="10,22,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_spotlight_Click"/>
+        <CheckBox x:Name="checkBox_spotlight" Content="Spotlight" Grid.Column="5" HorizontalAlignment="Left" Margin="10,10,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_spotlight_Click"/>
         <CheckBox x:Name="checkBox_reel_lock" Content="Lock Reel Camera" Grid.Column="3" HorizontalAlignment="Left" Margin="26,10,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_reel_lock_Click"/>
         <CheckBox x:Name="checkBox_slide_lock" Content="Lock Slide Camera" Grid.Column="3" HorizontalAlignment="Left" Margin="26,34,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_slide_lock_Click"/>
         <CheckBox x:Name="checkBox_upsidedown" Content="Reel Upside down" Grid.Column="4" HorizontalAlignment="Left" Margin="10,35,0,0" Grid.Row="2" VerticalAlignment="Top" Click="CheckBox_upsidedown_Click"/>
+        <CheckBox x:Name="checkBox_threshold" Content="Threshold" Grid.Column="5" HorizontalAlignment="Left" Margin="10,34,0,0" Grid.Row="2" VerticalAlignment="Top" Click="checkBox_threshold_Click"/>
+        <Slider x:Name="slider_threshold" Grid.Column="1" Margin="10,9,10,0" Grid.Row="2" VerticalAlignment="Top"  Height="24" ValueChanged="slider_threshold_ValueChanged" Maximum="255" SmallChange="1" Value="100" TickPlacement="BottomRight" TickFrequency="10"/>
+        <Label x:Name="label_threshold" Content="Threshold"  Foreground="#FFDADADA" HorizontalContentAlignment="Center" Grid.Column="1" Margin="10,28,10,0" Grid.Row="2" VerticalAlignment="Top" Height="32"/>
 
 
     </Grid>
