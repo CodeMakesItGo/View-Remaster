@@ -242,7 +242,7 @@ namespace ViewRemaster_Tools
                 var imageR = pi.RotateImage(image, angle);
                 var maskR = pi.RotateImage(mask, angle);
                 var bm = pi.MaskImage(imageR, maskR);
-
+               
                 var filename = $"{ProcessPath}\\{ProcessOrder[CurrentSlide]}_rot.png";
                 bm.Save(filename);
                 SetImageEvent?.Invoke(ImageType.ROTATED, filename);
@@ -369,6 +369,7 @@ namespace ViewRemaster_Tools
                 PrepairImages pi = new PrepairImages();
 
                 var image_crop = pi.CropImage(image_rot, true);
+                image_crop = pi.RecolorImage(image_crop);
                 var filename_cropped = $"{ProcessPath}\\{ProcessOrder[CurrentSlide]}_cropped.png";
                 image_crop.Save(filename_cropped);
 

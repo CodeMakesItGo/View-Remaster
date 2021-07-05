@@ -289,5 +289,16 @@ namespace ViewRemaser
                 captureImages.ThresholdEnabled = false;
             }
         }
+
+        private void image_settings_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            SettingsWindow sw = new ViewRemaster_Tools.SettingsWindow();
+            sw.ShowDialog();
+
+            if (sw.PathChanged)
+            {
+
+            }
+        }
     }
 }

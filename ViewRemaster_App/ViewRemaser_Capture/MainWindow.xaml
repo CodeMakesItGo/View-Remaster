@@ -87,6 +87,7 @@
         <CheckBox x:Name="checkBox_threshold" Content="Threshold" Grid.Column="5" HorizontalAlignment="Left" Margin="10,34,0,0" Grid.Row="2" VerticalAlignment="Top" Click="checkBox_threshold_Click"/>
         <Slider x:Name="slider_threshold" Grid.Column="1" Margin="10,9,10,0" Grid.Row="2" VerticalAlignment="Top"  Height="24" ValueChanged="slider_threshold_ValueChanged" Maximum="255" SmallChange="1" Value="100" TickPlacement="BottomRight" TickFrequency="10"/>
         <Label x:Name="label_threshold" Content="Threshold"  Foreground="#FFDADADA" HorizontalContentAlignment="Center" Grid.Column="1" Margin="10,28,10,0" Grid.Row="2" VerticalAlignment="Top" Height="32"/>
+        <Image x:Name="image_settings" Grid.Column="5" HorizontalAlignment="Right" Height="45" Grid.Row="2" VerticalAlignment="Center" Width="48" Source="PinClipart.com_cogs-clipart_5699181.png" MouseLeftButtonUp="image_settings_MouseLeftButtonUp"/>
 
 
     </Grid>
