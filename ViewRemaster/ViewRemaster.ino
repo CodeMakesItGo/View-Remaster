@@ -10,7 +10,6 @@
 #define HALF_STEP 1         // slowest but highest torque
 #define FULL_STEP 2         // medium speed medium torque
 #define DOUBLE_STEP 3       // fast speed low torque
-#define STEP_MODE FULL_STEP // Set to FULL Stepping
 #define STEPPER_DELAY 3     // 3ms cycle period
 #define ALIGN_COUNT 150     // Min step count for the alignment indent
 #define SLACK       30      // Slack in gear
@@ -31,6 +30,7 @@ static SLIDE_STATE state = START;       // Slide state when searching for next s
 static String inputString = "";      // /The String to hold incoming data
 static bool stringComplete = false;  // if string contains '\n'
 static int stepCounter = 0;          // The stepper motor counter for centering slides
+static int STEP_MODE = HALF_STEP; // Set to FULL Stepping
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
@@ -201,6 +201,7 @@ void nextSlide(bool align)
   {
     if(state == START)
     {
+       stepCounter = 0;
        state = GAP_START;
        motor_state = FWD;
     }
@@ -236,8 +237,15 @@ void nextSlide(bool align)
     }
     else if(state == GAP_START) 
     {
-      stepCounter = 0;
-      state = GAP_END;
+      if(stepCounter < 300)
+      {
+        state = START;
+      }
+      else
+      {
+        stepCounter = 0;
+        state = GAP_END;
+      }
     }
     else if(state == CENTER)
     {
@@ -259,10 +267,12 @@ void loop()
   switch(function)
   {
     case NEXT:
+      STEP_MODE = HALF_STEP;
       nextSlide(false);
     break;
 
     case ALIGN:
+      STEP_MODE = FULL_STEP;
       nextSlide(true);
     break;
 
