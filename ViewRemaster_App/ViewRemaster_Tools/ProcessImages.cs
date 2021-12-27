@@ -127,7 +127,7 @@ namespace ViewRemaster_Tools
                     gr.FillEllipse(Brushes.Black, rectInner);
                 }
 
-                reelImage = pi.ResizeImage(reelImage, OutputWidth, OutputHeight);
+                //reelImage = pi.ResizeImage(reelImage, OutputWidth, OutputHeight);
                 reelImage.Save($"{ProcessPath}\\0R_final.png");
                 reelImage.Save($"{ProcessPath}\\0L_final.png");
             }
@@ -266,20 +266,18 @@ namespace ViewRemaster_Tools
             {
                 PrepairImages pi = new PrepairImages();
 
-                //Crop to just the reel width
-                var left = pi.CropImage(i, new Rectangle(Settings.Instance.ReelCrop_X, 0, Settings.Instance.ReelCrop_Width, ReelHeight));
-
-                float totalWidth = Settings.Instance.ReelCrop_Width + (Settings.Instance.Slide_Gap);
+                float totalWidth = Settings.Instance.ReelCrop_Width + (Settings.Instance.Slide_Gap / 2.0f);
                 float totalHeight = ReelHeight;
 
                 var halfWidth = (OutputWidth / 2);
                 var halfGap = (Settings.Instance.Slide_Gap / 2);
-          
+
                 float ratio = totalWidth / totalHeight;
                 int resizeRatio = (int)(halfWidth / ratio);
                 int offsetHeight = ((OutputHeight - resizeRatio) / 2);
 
-                //left = pi.ResizeImage(left, halfWidth, (int)resizeRatio);
+                //Crop to just the reel width
+                var left = pi.CropImage(i, new Rectangle(Settings.Instance.ReelCrop_X, Settings.Instance.ReelCrop_Y, (int)(Settings.Instance.ReelCrop_Width * (totalHeight/ totalWidth )), Settings.Instance.ReelCrop_Width));
 
                 using (Bitmap bitmap = new Bitmap(OutputWidth, OutputHeight, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                 using (Graphics grD = Graphics.FromImage(bitmap))

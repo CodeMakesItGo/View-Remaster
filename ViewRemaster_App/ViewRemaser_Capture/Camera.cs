@@ -17,11 +17,14 @@ namespace ViewRemaser
         private VideoCaptureDevice _videoSource;
         private string VideoDeviceMoniker = null;
         private VideoCapabilities videoSelected = null;
+        public System.Windows.Size VideoResolution;
         public NewFrameEventHandler Video_NewFrame {private get; set; }
+        public NewFrameEventHandler Snapshot_NewFrame {private get; set; }
 
-        public Camera(NewFrameEventHandler handler)
+        public Camera(NewFrameEventHandler video_handler, NewFrameEventHandler snapshot_handler)
         {
-            Video_NewFrame = handler;
+            Video_NewFrame = video_handler;
+            Snapshot_NewFrame = snapshot_handler;
         }
         
         #region Camera
@@ -42,6 +45,8 @@ namespace ViewRemaser
                 VideoDeviceMoniker = form.VideoDeviceMoniker;
 
                 videoSelected = form.VideoDevice.VideoResolution;
+
+                VideoResolution = new System.Windows.Size() { Height = videoSelected.FrameSize.Height, Width = videoSelected.FrameSize.Width };
 
                 // stop current video source
                 StopCamera();
@@ -70,6 +75,11 @@ namespace ViewRemaser
 
         }
 
+        public void TriggerSnapShot()
+        {
+            _videoSource.SimulateTrigger();
+        }
+
 
         private void StartCamera()
         {
@@ -77,10 +87,16 @@ namespace ViewRemaser
             {
                 _videoSource = new VideoCaptureDevice(VideoDeviceMoniker)
                 {
-                    VideoResolution = videoSelected
+                    VideoResolution = videoSelected,
+                   
                 };
+
+                _videoSource.SnapshotResolution = _videoSource.SnapshotCapabilities[0];
+                _videoSource.ProvideSnapshots = true;
                 _videoSource.NewFrame += Video_NewFrame;
+                _videoSource.SnapshotFrame += Snapshot_NewFrame;
                 _videoSource.Start();
+                
             }
         }
 

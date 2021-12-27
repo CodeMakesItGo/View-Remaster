@@ -3,11 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewRemaster_Process", "ViewRemaster_Process\ViewRemaster_Process.csproj", "{909FBF63-B505-4559-A9C6-C3FC3271B4E1}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5BBBFFC5-71E9-43F9-8874-98F98DDE70A5} = {5BBBFFC5-71E9-43F9-8874-98F98DDE70A5}
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewRemaster_Tools", "ViewRemaster_Tools\ViewRemaster_Tools.csproj", "{5BBBFFC5-71E9-43F9-8874-98F98DDE70A5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ViewRemaser_Capture", "ViewRemaser_Capture\ViewRemaser_Capture.csproj", "{A04BDBD7-7784-4ACD-AE06-B5DA9C8A89B7}"
@@ -21,10 +16,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{909FBF63-B505-4559-A9C6-C3FC3271B4E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{909FBF63-B505-4559-A9C6-C3FC3271B4E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{909FBF63-B505-4559-A9C6-C3FC3271B4E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{909FBF63-B505-4559-A9C6-C3FC3271B4E1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5BBBFFC5-71E9-43F9-8874-98F98DDE70A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5BBBFFC5-71E9-43F9-8874-98F98DDE70A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BBBFFC5-71E9-43F9-8874-98F98DDE70A5}.Release|Any CPU.ActiveCfg = Release|Any CPU

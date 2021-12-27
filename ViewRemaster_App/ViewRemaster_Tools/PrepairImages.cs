@@ -670,7 +670,7 @@ namespace ViewRemaster_Tools
                     Height = image.Height - Settings.Instance.SlideText_Top
                 };
 
-                g.DrawString(text, new Font("Arial", 32, FontStyle.Bold), Brushes.White, rect, drawFormat);
+                g.DrawString(text, new Font("Arial", 48, FontStyle.Bold), Brushes.White, rect, drawFormat);
             }
 
             return image;

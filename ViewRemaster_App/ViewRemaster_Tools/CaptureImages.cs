@@ -18,6 +18,9 @@ namespace ViewRemaster_Tools
         private string ReelSnapshotFileName = "";
         private string SlideSnapshotFileName = "";
 
+        public bool TriggerSlideSnapshot { get; set; }
+        public bool TriggerReelSnapshot { get; set; }
+
         private SerialPort serialPort = null;
 
         private bool AlignSlideTopGood = false;
@@ -81,7 +84,7 @@ namespace ViewRemaster_Tools
                 }
             }
 
-            CurrentSlide = 0;
+            CurrentSlide = 0;                               
 
             Lights(true, false);
             ReelShot();
@@ -110,16 +113,19 @@ namespace ViewRemaster_Tools
             Lights(false, false);
         }
 
+      
+
         public void AlignSlide()
         {
             AlignSlideEnabled = true;
             AlignSlideBottomGood = false;
             AlignSlideTopGood = false;
 
-            while (AlignSlideBottomGood == false || AlignSlideTopGood == false)
+            while (AlignSlideEnabled)//AlignSlideBottomGood == false || AlignSlideTopGood == false)
             {
-               
-                if (AlignSlideTopGood == false)
+
+                Thread.Sleep(10);
+                /*if (AlignSlideTopGood == false)
                 {
                     InchDown();
                     WaitForSerial();
@@ -130,10 +136,10 @@ namespace ViewRemaster_Tools
                 {
                     InchUp();
                     WaitForSerial();
-                }
+                } */
             }
 
-            AlignSlideEnabled = false;
+            //AlignSlideEnabled = false;
         }
 
         private void Lights(bool spotlight, bool backlight)
@@ -160,6 +166,7 @@ namespace ViewRemaster_Tools
                 UpdateStatusEvent?.Invoke($"{CaptureOrder[CurrentSlide]} - text");
                 var filename = $"{Path}\\{CaptureOrder[CurrentSlide]}_text.png";
                 ReelSnapshotFileName = filename;
+                TriggerReelSnapshot = true;
                 WaitForReelPicture();
             }
         }
@@ -170,6 +177,7 @@ namespace ViewRemaster_Tools
             
             var filename = $"{Path}\\{CaptureOrder[CurrentSlide]}_mask.png";
             SlideSnapshotFileName = filename;
+            TriggerSlideSnapshot = true;
             WaitForSlidePicture();
         }
 
@@ -179,10 +187,35 @@ namespace ViewRemaster_Tools
 
             var filename = $"{Path}\\{CaptureOrder[CurrentSlide]}.png";
             SlideSnapshotFileName = filename;
+            TriggerSlideSnapshot = true;
             WaitForSlidePicture();
         }
 
-        public BitmapImage UpdateSlideImage(Bitmap frame)
+        public void UpdateSnapshotImage(Bitmap frame, bool slide)
+        {
+            using (var bm = (Bitmap)frame.Clone())
+            {
+                bool upsideDown = CaptureOrder[CurrentSlide].Contains("R");
+                if (upsideDown)
+                {
+                    bm.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                }
+
+                if (slide && SlideSnapshotFileName != "")
+                {
+                    bm.Save(SlideSnapshotFileName);
+                    SlideSnapshotFileName = "";
+                }
+
+                if (!slide && ReelSnapshotFileName != "")
+                {
+                    bm.Save(ReelSnapshotFileName);
+                    ReelSnapshotFileName = "";
+                }
+            }
+        }
+
+        public BitmapImage UpdateSlideImage(Bitmap frame, bool align_slide, System.Windows.Size videoResolution)
         {
             BitmapImage bi;
 
@@ -192,6 +225,21 @@ namespace ViewRemaster_Tools
                 if (upsideDown)
                 {
                     bm.RotateFlip(RotateFlipType.Rotate180FlipNone);
+                }
+
+                //top and bottom gap size
+                int gap = 30;
+
+                if (align_slide)
+                {
+                    using (Graphics gr = Graphics.FromImage(bm))
+                    {
+                        using (Pen thick_pen = new Pen(Color.Blue, 8))
+                        {
+                            gr.DrawLine(thick_pen, 0, gap, bm.Width, gap);
+                            gr.DrawLine(thick_pen, 0, bm.Height - gap, bm.Width, bm.Height - gap);
+                        }
+                    }
                 }
 
                 if (ThresholdEnabled || AlignSlideEnabled)
@@ -205,7 +253,7 @@ namespace ViewRemaster_Tools
                         {
                             int center = thresholdedBitmap.Width / 2;
                             int width = 30;
-                            int gap = 50;
+                            
 
                             //test 3 dots top
                             if (thresholdedBitmap.GetPixel(center, gap).Name.Equals("ffffffff") &&
@@ -230,6 +278,24 @@ namespace ViewRemaster_Tools
                             {
                                 if (upsideDown) AlignSlideTopGood = false; else AlignSlideBottomGood = false;
                             }
+
+                            if (AlignSlideTopGood == false)
+                            {
+                                InchDown();
+                                WaitForSerial();
+              
+                            }
+
+
+                            if (AlignSlideBottomGood == false)
+                            {
+                                InchUp();
+                                WaitForSerial();
+     
+                            }
+
+                            if(AlignSlideTopGood && AlignSlideBottomGood)
+                                AlignSlideEnabled = false;
                         }
                     }
                 }
@@ -238,19 +304,13 @@ namespace ViewRemaster_Tools
                     bi = bm.ToBitmapImage();
                 }
 
-                if (SlideSnapshotFileName != "")
-                {
-                    bm.Save(SlideSnapshotFileName);
-                    SlideSnapshotFileName = "";
-                }
-
             }
             bi.Freeze(); // avoid cross thread operations and prevents leaks
 
             return bi;
         }
 
-        public BitmapImage UpdateReelImage(Bitmap frame, bool align_reel)
+        public BitmapImage UpdateReelImage(Bitmap frame, bool align_reel, System.Windows.Size videoResolution)
         {
             BitmapImage bi;
             using (var bitmap = (Bitmap)frame.Clone())
@@ -259,33 +319,34 @@ namespace ViewRemaster_Tools
                 {
                     using (Graphics gr = Graphics.FromImage(bitmap))
                     {
+                        double xfactor = ReelWidth / videoResolution.Width;
+                        double yfactor = ReelHeight / videoResolution.Height;
+
                         //Draw the out and inner circle on the reel live image
-                        Rectangle rectOuter = new Rectangle(Settings.Instance.ReelCrop_X, Settings.Instance.ReelCrop_Y, Settings.Instance.ReelCrop_Width, Settings.Instance.ReelCrop_Width);
-                        var x = (Settings.Instance.ReelCrop_X + (Settings.Instance.ReelCrop_Width / 2)) - (Settings.Instance.ReelCropCenter_Width / 2);
-                        var y = (Settings.Instance.ReelCrop_Y + (Settings.Instance.ReelCrop_Width / 2)) - (Settings.Instance.ReelCropCenter_Width / 2);
-                        Rectangle rectInner = new Rectangle(x, y, Settings.Instance.ReelCropCenter_Width, Settings.Instance.ReelCropCenter_Width);
+                        //Rectangle rectOuter = new Rectangle((int)(Settings.Instance.ReelCrop_X / xfactor), (int)(Settings.Instance.ReelCrop_Y / yfactor), (int)(Settings.Instance.ReelCrop_Width / xfactor), (int)(Settings.Instance.ReelCrop_Width / yfactor));
+                        //var x = (Settings.Instance.ReelCrop_X / xfactor + (Settings.Instance.ReelCrop_Width / xfactor / 2)) - (Settings.Instance.ReelCropCenter_Width / xfactor / 2);
+                        //var y = (Settings.Instance.ReelCrop_Y / yfactor + (Settings.Instance.ReelCrop_Width / yfactor / 2)) - (Settings.Instance.ReelCropCenter_Width / yfactor / 2);
+                        var x = (frame.Width / 2) - (Settings.Instance.ReelCropCenter_Width / xfactor / 2);
+                        var y = (frame.Height / 2) - (Settings.Instance.ReelCropCenter_Width / xfactor / 2);
+                        Rectangle rectInner = new Rectangle((int)x, (int)y, (int)(Settings.Instance.ReelCropCenter_Width / xfactor), (int)(Settings.Instance.ReelCropCenter_Width / yfactor));
 
                         using (Pen thick_pen = new Pen(Color.Blue, 8))
                         {
-                            gr.DrawEllipse(thick_pen, rectOuter);
+                            //gr.DrawEllipse(thick_pen, rectOuter);
                             gr.DrawEllipse(thick_pen, rectInner);
                         }
 
                         //Draw the OCR text crop box
-                        Rectangle textBox = new Rectangle(Settings.Instance.TextCrop_X, Settings.Instance.TextCrop_Y, Settings.Instance.TextCrop_Width, Settings.Instance.TextCrop_Height);
-                        using (Pen thick_pen = new Pen(Color.Red, 8))
-                        {
-                            gr.DrawRectangle(thick_pen, textBox);
-                        }
+                       // Rectangle textBox = new Rectangle((int)(Settings.Instance.TextCrop_X / xfactor), (int)(Settings.Instance.TextCrop_Y / yfactor), (int)(Settings.Instance.TextCrop_Width / xfactor), (int)(Settings.Instance.TextCrop_Height / yfactor));
+                       // using (Pen thick_pen = new Pen(Color.Red, 8))
+                       // {
+                       //     gr.DrawRectangle(thick_pen, textBox);
+                       // }
                     }
                 }
                 bi = bitmap.ToBitmapImage();
 
-                if (ReelSnapshotFileName != "")
-                {
-                    bitmap.Save(ReelSnapshotFileName);
-                    ReelSnapshotFileName = "";
-                }
+             
             }
             bi.Freeze(); // avoid cross thread operations and prevents leaks
             return bi;
@@ -317,7 +378,7 @@ namespace ViewRemaster_Tools
 
         private void WaitForCameraAdjust()
         {
-            System.Threading.Thread.Sleep(7000);
+            System.Threading.Thread.Sleep(3000);
         }
 
         public void ConnectSerial(string port)

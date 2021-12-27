@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="Settings" Height="620" Width="450" Background="#FF292929" Loaded="Window_Loaded">
     <Grid>
-        <Label x:Name="label_Root" Content="Save Directory:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="White"/>
+        <Label x:Name="label_Root" Content="Slide Directory:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Background="{x:Null}" Foreground="White"/>
         <TextBox x:Name="textBox_RootPath" Height="23" Margin="10,40,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" />
         <Button x:Name="button_save" Content="Save" Margin="0,0,10,10" Click="button_save_Click" HorizontalAlignment="Right" Width="75" Height="24" VerticalAlignment="Bottom"/>
         <GroupBox x:Name="Reel" Header="Reel Crop" HorizontalAlignment="Left" Height="125" Margin="10,68,0,0" VerticalAlignment="Top" Width="422" Foreground="#FFD9D9D9">
@@ -19,10 +19,10 @@
                 <xctk:IntegerUpDown x:Name="spinner_reel_y" Value="0" Increment="1" Width="65" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_reel_y_ValueChanged" Canvas.Left="34" Canvas.Top="55"  />
                 <Label  Content="Y" Canvas.Left="10" Canvas.Top="55" Foreground="White"/>
 
-                <xctk:IntegerUpDown x:Name="spinner_reel_width" Value="0" Increment="1" Width="65" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_reel_width_ValueChanged" Canvas.Left="234" Canvas.Top="10"  />
+                <xctk:IntegerUpDown x:Name="spinner_reel_width" Value="0" Increment="1" Width="65" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_reel_width_ValueChanged" Canvas.Left="234" Canvas.Top="10" ToolTip="Diameter of circle. "  />
                 <Label  Content="Width" Canvas.Left="179" Canvas.Top="10" Foreground="White"/>
 
-                <xctk:IntegerUpDown x:Name="spinner_reel_center" Value="0" Increment="1" Width="65" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_reel_center_ValueChanged" Canvas.Left="263" Canvas.Top="55"  />
+                <xctk:IntegerUpDown x:Name="spinner_reel_center" Value="0" Increment="1" Width="65" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_reel_center_ValueChanged" Canvas.Left="263" Canvas.Top="55" ToolTip="Center of the slide to remove."  />
                 <Label  Content="Dot Width" Canvas.Left="179" Canvas.Top="55" Foreground="White"/>
             </Canvas>
         </GroupBox>
@@ -40,7 +40,7 @@
                 <xctk:IntegerUpDown x:Name="spinner_text_height" Value="0" Increment="1" Width="65" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_text_height_ValueChanged" Canvas.Left="239" Canvas.Top="55"  />
                 <Label  Content="Height" Canvas.Left="179" Canvas.Top="55" Foreground="White"/>
 
-                <xctk:IntegerUpDown x:Name="spinner_text_top" Value="0" Increment="1" Width="94" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_text_top_ValueChanged" Canvas.Left="49" Canvas.Top="100"  />
+                <xctk:IntegerUpDown x:Name="spinner_text_top" Value="0" Increment="1" Width="94" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_text_top_ValueChanged" Canvas.Left="49" Canvas.Top="100" ToolTip="The slide commentary overlay."  />
                 <Label  Content="Top" Canvas.Left="10" Canvas.Top="100" Foreground="White"/>
             </Canvas>
         </GroupBox>
@@ -58,13 +58,13 @@
                 <xctk:IntegerUpDown x:Name="spinner_slide_height" Value="0" Increment="1" Width="65" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_slide_height_ValueChanged" Canvas.Left="239" Canvas.Top="55"  />
                 <Label  Content="Height" Canvas.Left="179" Canvas.Top="55" Foreground="White"/>
 
-                <xctk:IntegerUpDown x:Name="spinner_slide_corner" Value="0" Increment="1" Width="64" Height="30" Maximum="1000" Minimum="0" ValueChanged="spinner_slide_corner_ValueChanged" Canvas.Left="70" Canvas.Top="100"  />
+                <xctk:IntegerUpDown x:Name="spinner_slide_corner" Value="0" Increment="1" Width="64" Height="30" Maximum="1000" Minimum="0" ValueChanged="spinner_slide_corner_ValueChanged" Canvas.Left="70" Canvas.Top="100" ToolTip="Corner radius."  />
                 <Label  Content="Corner" Canvas.Left="10" Canvas.Top="100" Foreground="White"/>
 
-                <xctk:IntegerUpDown x:Name="spinner_slide_gap" Value="0" Increment="1" Width="64" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_slide_gap_ValueChanged" Canvas.Left="207" Canvas.Top="100"  />
+                <xctk:IntegerUpDown x:Name="spinner_slide_gap" Value="0" Increment="1" Width="64" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_slide_gap_ValueChanged" Canvas.Left="207" Canvas.Top="100" ToolTip="Gap between slides in 3D view."  />
                 <Label  Content="Gap" Canvas.Left="165" Canvas.Top="100" Foreground="White"/>
 
-                <xctk:IntegerUpDown x:Name="spinner_slide_top" Value="0" Increment="1" Width="73" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_slide_top_ValueChanged" Canvas.Left="327" Canvas.Top="100"  />
+                <xctk:IntegerUpDown x:Name="spinner_slide_top" Value="0" Increment="1" Width="73" Height="30" Maximum="10000" Minimum="0" ValueChanged="spinner_slide_top_ValueChanged" Canvas.Left="327" Canvas.Top="100" ToolTip="Space to leave on top of slide."  />
                 <Label  Content="Top" Canvas.Left="288" Canvas.Top="100" Foreground="White"/>
             </Canvas>
         </GroupBox>

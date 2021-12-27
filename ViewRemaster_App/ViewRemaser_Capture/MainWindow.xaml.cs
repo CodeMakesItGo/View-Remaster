@@ -15,11 +15,12 @@ namespace ViewRemaser
     {
         private readonly CaptureImages captureImages = new CaptureImages();
         private bool align_reel = false;
+        private bool align_slide = false;
 
         private Camera SlideCamera = null;
         private Camera ReelCamera = null;
-        private int Exposure { get; set; } = -6;
- 
+        private int SlideExposure { get; set; } = -5;
+        private int ReelExposure { get; set; } = -5;
 
         public MainWindow()
         {
@@ -44,8 +45,8 @@ namespace ViewRemaser
             captureImages.CommWaitingEvent += CaptureImages_CommWaitingEvent;
             captureImages.UpdateStatusEvent += CaptureImages_UpdateStatusEvent;
             captureImages.RecievedSerialDataEvent += CaptureImages_RecievedSerialDataEvent;
-            SlideCamera = new Camera(Slide_NewFrame);
-            ReelCamera = new Camera(Reel_NewFrame);        
+            SlideCamera = new Camera(Slide_NewFrame, Slide_NewSnapshotFrame);
+            ReelCamera = new Camera(Reel_NewFrame, Reel_NewSnapshotFrame);
         }
 
         private void CaptureImages_RecievedSerialDataEvent(string data)
@@ -74,13 +75,26 @@ namespace ViewRemaser
             ReelCamera.StopCamera();
         }
 
+        //Started to skip everyother frame so the redering can keep up
+        bool slide_skip = true;
         private void Slide_NewFrame(object sender, AForge.Video.NewFrameEventArgs eventArgs)
         {
+            slide_skip = !slide_skip;
+            if (slide_skip)
+            {
+                return;
+            }
             try
             {
-                BitmapImage bi = captureImages.UpdateSlideImage((Bitmap)eventArgs.Frame.Clone());
-                Dispatcher.Invoke(new Action(() => videoPlayer.Source = bi));
-                SlideCamera.SetExposure(Exposure);
+                BitmapImage bi = captureImages.UpdateSlideImage(eventArgs.Frame, align_slide, SlideCamera.VideoResolution);
+                Dispatcher.BeginInvoke(new Action(() => videoPlayer.Source = bi));
+                SlideCamera.SetExposure(SlideExposure);
+                
+                if (captureImages.TriggerSlideSnapshot)
+                {
+                    SlideCamera.TriggerSnapShot();
+                    captureImages.TriggerSlideSnapshot = false;
+                }
             }
             catch (Exception exc)
             {
@@ -89,12 +103,40 @@ namespace ViewRemaser
             }
         }
 
-         private void Reel_NewFrame(object sender, AForge.Video.NewFrameEventArgs eventArgs)
+        void Slide_NewSnapshotFrame(object sender, AForge.Video.NewFrameEventArgs eventArgs)
         {
             try
             {
-                BitmapImage bi = captureImages.UpdateReelImage(eventArgs.Frame, align_reel);
+                captureImages.UpdateSnapshotImage(eventArgs.Frame, true);
+                SlideCamera.SetExposure(SlideExposure);
+                SlideCamera.LockCameraProperties(false);
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show("Error on _snapshot_NewFrame:\n" + exc.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        //Started to skip everyother frame so the redering can keep up
+        bool reel_skip = true;
+        private void Reel_NewFrame(object sender, AForge.Video.NewFrameEventArgs eventArgs)
+        {
+            reel_skip = !reel_skip;
+            if(reel_skip)
+            {
+                return;
+            }
+            try
+            {
+                BitmapImage bi = captureImages.UpdateReelImage(eventArgs.Frame, align_reel, ReelCamera.VideoResolution);
                 Dispatcher.BeginInvoke(new Action(() => ReelPlayer.Source = bi));
+                ReelCamera.SetExposure(ReelExposure);
+
+                if(captureImages.TriggerReelSnapshot)
+                {
+                    ReelCamera.TriggerSnapShot();
+                    captureImages.TriggerReelSnapshot = false;
+                }
             }
             catch (Exception exc)
             {
@@ -102,6 +144,21 @@ namespace ViewRemaser
                 ReelCamera.StopCamera();
             }
         }
+
+        private void Reel_NewSnapshotFrame(object sender, AForge.Video.NewFrameEventArgs eventArgs)
+        {
+            try
+            {
+                captureImages.UpdateSnapshotImage(eventArgs.Frame, false);
+                ReelCamera.SetExposure(ReelExposure);
+                ReelCamera.LockCameraProperties(false);
+            }
+            catch (Exception exc)
+            {
+                MessageBox.Show("Error on _snapshot_NewFrame:\n" + exc.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
 
         private void Button_Connect_Click(object sender, RoutedEventArgs e)
         {
@@ -130,16 +187,22 @@ namespace ViewRemaser
         {
             if (SlideCamera.SelectCamera())
             {
-                SlideCamera.GetExposureRange(out var min, out var max, out var defaultvalue);
+                SlideCamera.GetExposureRange(out var min, out var max, out _);
+                slider_exposure.Value = SlideExposure;
                 slider_exposure.Minimum = min;
                 slider_exposure.Maximum = max;
-                slider_exposure.Value = defaultvalue;
             }
         }
 
         private void Button_reelcamera_Click(object sender, RoutedEventArgs e)
         {
-            ReelCamera.SelectCamera();
+            if (ReelCamera.SelectCamera())
+            {
+                ReelCamera.GetExposureRange(out var min, out var max, out _);
+                reel_exposure.Value = ReelExposure;
+                reel_exposure.Minimum = min;
+                reel_exposure.Maximum = max;
+            }
         }
 
         private void Button_start_Click(object sender, RoutedEventArgs e)
@@ -184,8 +247,13 @@ namespace ViewRemaser
 
         private void Slider_exposure_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            Exposure = (int)slider_exposure.Value;
-            label_exposure.Content = $"Exposure = {Exposure}";
+            SlideExposure = (int)slider_exposure.Value;
+            label_slide_exposure.Content = $"Exposure = {SlideExposure}";
+        }
+        private void Reel_exposure_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            ReelExposure = (int)reel_exposure.Value;
+            label_reel_exposure.Content = $"Exposure = {ReelExposure}";
         }
 
 
@@ -229,6 +297,11 @@ namespace ViewRemaser
             align_reel = checkBox_align.IsChecked.Value;
         }
 
+        private void CheckBox_align_slide_Click(object sender, RoutedEventArgs e)
+        {
+            align_slide = checkBox_align_slide.IsChecked.Value;
+        }
+
         private void CheckBox_spotlight_Click(object sender, RoutedEventArgs e)
         {
             captureImages.Spotlight(checkBox_spotlight.IsChecked.Value);
@@ -270,7 +343,7 @@ namespace ViewRemaser
             }
         }
 
-        private void slider_threshold_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void Slider_threshold_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if(label_threshold != null)
                 label_threshold.Content = $"Threshold {(int)slider_threshold.Value}";
@@ -278,19 +351,26 @@ namespace ViewRemaser
             captureImages.Threshold = (int)slider_threshold.Value;
         }
 
-        private void checkBox_threshold_Click(object sender, RoutedEventArgs e)
+        private void CheckBox_threshold_Click(object sender, RoutedEventArgs e)
         {
             if (checkBox_threshold.IsChecked.HasValue)
             {
                 captureImages.ThresholdEnabled = checkBox_threshold.IsChecked.Value;
+
+                //Turn off backlight when doing a threshold test
+                if(checkBox_threshold.IsChecked.Value)
+                    captureImages.SetBrightness(0, false);
+                else
+                    captureImages.SetBrightness((byte)slider_brightness.Value);
             }
             else
             {
                 captureImages.ThresholdEnabled = false;
+                captureImages.SetBrightness((byte)slider_brightness.Value);
             }
         }
 
-        private void image_settings_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Image_settings_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             SettingsWindow sw = new ViewRemaster_Tools.SettingsWindow();
             sw.ShowDialog();
@@ -300,5 +380,7 @@ namespace ViewRemaser
 
             }
         }
+
+       
     }
 }

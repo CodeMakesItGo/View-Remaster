@@ -18,13 +18,13 @@ namespace ViewRemaster_Tools
         public int CurrentSlide { get; set; } = 0;
 
         //Camera resolution of the shots
-        public readonly int ReelWidth = 1920;
-        public readonly int ReelHeight = 1080;
-        public readonly int SlideWidth = 1600;
-        public readonly int SlideHeight = 1200;
+        public readonly int ReelWidth = 3264;
+        public readonly int ReelHeight = 2448;
+        public readonly int SlideWidth = 3264;
+        public readonly int SlideHeight = 2448;
 
-        public readonly int OutputWidth = 1920;
-        public readonly int OutputHeight = 1080;
+        public readonly int OutputWidth = 3840;
+        public readonly int OutputHeight = 2160;
 
         public ViewRemasterBase()
         {
