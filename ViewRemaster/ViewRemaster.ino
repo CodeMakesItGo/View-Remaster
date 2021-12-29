@@ -9,9 +9,9 @@
 //Stepper Motor 
 #define HALF_STEP 1         // slowest but highest torque
 #define FULL_STEP 2         // medium speed medium torque
-#define DOUBLE_STEP 3       // fast speed low torque
+//#define DOUBLE_STEP 3       // fast speed low torque
 #define STEPPER_DELAY 3     // 3ms cycle period
-#define ALIGN_COUNT 150     // Min step count for the alignment indent
+#define ALIGN_COUNT 300     // Min step count for the alignment indent
 #define SLACK       30      // Slack in gear
 
 //Ring LED
@@ -30,7 +30,7 @@ static SLIDE_STATE state = START;       // Slide state when searching for next s
 static String inputString = "";      // /The String to hold incoming data
 static bool stringComplete = false;  // if string contains '\n'
 static int stepCounter = 0;          // The stepper motor counter for centering slides
-static int STEP_MODE = HALF_STEP; // Set to FULL Stepping
+static int STEP_MODE = HALF_STEP;    // Default
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
@@ -89,22 +89,39 @@ void serialInput()
     }
     else if (inputString.equalsIgnoreCase("A\n")) 
     {
+      STEP_MODE = FULL_STEP;
+      motor_state = REV;
+      
+      int revCount = ALIGN_COUNT * 2;
+      while(revCount-- > 0)
+      {
+        stepperOutput();
+        delay(STEPPER_DELAY);
+      }
+        
+      motor_state = OFF;
+      function = NONE;
+      
       Serial.println("ALIGN");
       function = ALIGN;
     }
     else if (inputString.equalsIgnoreCase("U\n")) 
     {
       Serial.println("UP");
+      STEP_MODE = HALF_STEP;
       motor_state = FWD;
       stepperOutput();
+      motor_state = OFF;
       function = NONE;
       Serial.println("DONE");
     }
     else if (inputString.equalsIgnoreCase("D\n")) 
     {
       Serial.println("DOWN");
+      STEP_MODE = HALF_STEP;
       motor_state = REV;
       stepperOutput();
+      motor_state = OFF;
       function = NONE;
       Serial.println("DONE");
     }
@@ -208,7 +225,7 @@ void nextSlide(bool align)
     
     else if(state == GAP_END)
     {
-      if(align && stepCounter < ALIGN_COUNT)
+      if(align && stepCounter < (ALIGN_COUNT / STEP_MODE))
       {
         state = START;
         motor_state = FWD;
@@ -267,7 +284,7 @@ void loop()
   switch(function)
   {
     case NEXT:
-      STEP_MODE = HALF_STEP;
+      STEP_MODE = FULL_STEP;
       nextSlide(false);
     break;
 
@@ -313,7 +330,6 @@ void setup()
   digitalWrite(PD3, LOW);
   digitalWrite(PD4, LOW);
   digitalWrite(PD5, LOW);
-
   
   //Pin setup to read optical endstops
   pinMode(PD6, INPUT);
