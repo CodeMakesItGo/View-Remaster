@@ -4,12 +4,12 @@
  */
 #include <FastLED.h>
 
-#define VERSION "ViewRemaster 1.0\n"
+#define VERSION "ViewRemaster 1.1\n"
  
 //Stepper Motor 
 #define HALF_STEP 1         // slowest but highest torque
 #define FULL_STEP 2         // medium speed medium torque
-//#define DOUBLE_STEP 3       // fast speed low torque
+//#define DOUBLE_STEP 3     // fast speed low torque
 #define STEPPER_DELAY 3     // 3ms cycle period
 #define ALIGN_COUNT 300     // Min step count for the alignment indent
 #define SLACK       30      // Slack in gear
@@ -151,12 +151,14 @@ void serialInput()
       int value = inputString.substring(1).toInt();
       if(value == 0)
       {
-        digitalWrite(10, LOW);
+        analogWrite(10, 255);
+        analogWrite(11, 255);
         Serial.println("Light = Off");
       }
       else
       {
-        digitalWrite(10, HIGH);
+        analogWrite(10, value & 0x01 != 0 ? 0 : 255);
+        analogWrite(11, value >> 1 ? 0 : 255);
         Serial.println("Light = On");
       }
       Serial.println("DONE");
@@ -337,6 +339,8 @@ void setup()
   //Pin for the spotlight
   pinMode(10, OUTPUT);
   digitalWrite(10, LOW);
+  pinMode(11, OUTPUT);
+  digitalWrite(11, LOW);
   
   motor_state = OFF;
 
