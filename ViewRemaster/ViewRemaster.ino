@@ -1,10 +1,12 @@
 /* View-Remaster scanner platform
  * https://youtu.be/6Y3vohi8WqI
- * 
+ * 1.0 init version
+ * 1.1 Added dual external light control
+ * 1.2 Added dual internal light control
  */
 #include <FastLED.h>
 
-#define VERSION "ViewRemaster 1.1\n"
+#define VERSION "ViewRemaster 1.2\n"
  
 //Stepper Motor 
 #define HALF_STEP 1         // slowest but highest torque
@@ -16,6 +18,7 @@
 
 //Ring LED
 #define NUM_LEDS 7
+#define NUM_LEDS_RING 24
 #define LED_PIN 7
 #define BRIGHTNESS 64
 
@@ -33,7 +36,7 @@ static int stepCounter = 0;          // The stepper motor counter for centering 
 static int STEP_MODE = HALF_STEP;    // Default
 
 // Define the array of leds
-CRGB leds[NUM_LEDS];
+CRGB leds[NUM_LEDS+NUM_LEDS_RING];
 
 /// The stepperOutput will control the stepper motor 
 void stepperOutput()
@@ -203,6 +206,47 @@ void serialInput()
 
       Serial.println("DONE");
     }
+    else if (inputString.startsWith("G")) //GLOW 
+    {
+      int s = 1;
+      int e = inputString.indexOf(',');
+      bool success = false;
+
+      do
+      {
+        if(e == -1) break;
+        int r = inputString.substring(s, e).toInt();
+        //Serial.println(r);
+        s = e + 1;
+        e = inputString.indexOf(',', s);
+
+        if(e == -1) break;
+        int g = inputString.substring(s, e).toInt();
+        //Serial.println(g);
+        s = e + 1;
+       
+        int b = inputString.substring(s).toInt();
+        //Serial.println(b);
+
+        Serial.println("Color = " + String(r) + "," + String(g) + "," + String(b));
+        
+        for(int i = NUM_LEDS; i < NUM_LEDS + NUM_LEDS_RING; i++)
+        {
+          leds[i].setRGB(r,g,b);
+        }
+        FastLED.show();
+        success = true;
+        
+      }while(false);
+
+      if(!success)
+      {
+        Serial.println("Color = invalid");
+      }
+
+      Serial.println("DONE");
+    }
+
 
     // clear the string:
     inputString = "";
@@ -317,7 +361,7 @@ void setup()
   Serial.println(VERSION);
 
   //Start FastLED
-  FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS);  // GRB ordering is assumed
+  FastLED.addLeds<NEOPIXEL, LED_PIN>(leds, NUM_LEDS+NUM_LEDS_RING);  // GRB ordering is assumed
   FastLED.setBrightness(  BRIGHTNESS );
   
   // reserve 32 bytes for the inputString:
@@ -344,7 +388,7 @@ void setup()
   
   motor_state = OFF;
 
-  for(int i = 0; i < NUM_LEDS; i++)
+  for(int i = 0; i < NUM_LEDS + NUM_LEDS_RING; i++)
   {
     leds[i] = CRGB::White;
   }
